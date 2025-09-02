@@ -12,11 +12,12 @@ type databaseObfuscator interface {
 }
 
 type dbAttributes struct {
-	attributes map[string]bool
+	attributes            map[string]bool
+	sanitizeAllAttributes bool
 }
 
 func (d *dbAttributes) ShouldProcessAttribute(attributeKey string) bool {
-	return d.attributes[attributeKey]
+	return d.attributes[attributeKey] || d.sanitizeAllAttributes
 }
 
 type sqlObfuscator struct {

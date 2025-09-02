@@ -50,10 +50,11 @@ func NewObfuscator(cfg DBSanitizerConfig) *Obfuscator {
 
 	if cfg.SQLConfig.Enabled {
 		attributes := createAttributes(cfg.SQLConfig.Attributes)
-		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0
+		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0 || cfg.SQLConfig.SanitizeAllAttributes
 		obfuscators = append(obfuscators, &sqlObfuscator{
 			dbAttributes: dbAttributes{
-				attributes: attributes,
+				attributes:            attributes,
+				sanitizeAllAttributes: cfg.SQLConfig.SanitizeAllAttributes,
 			},
 			obfuscator: o,
 		})
@@ -61,10 +62,11 @@ func NewObfuscator(cfg DBSanitizerConfig) *Obfuscator {
 
 	if cfg.RedisConfig.Enabled {
 		attributes := createAttributes(cfg.RedisConfig.Attributes)
-		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0
+		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0 || cfg.RedisConfig.SanitizeAllAttributes
 		obfuscators = append(obfuscators, &redisObfuscator{
 			dbAttributes: dbAttributes{
-				attributes: attributes,
+				attributes:            attributes,
+				sanitizeAllAttributes: cfg.RedisConfig.SanitizeAllAttributes,
 			},
 			obfuscator: o,
 		})
@@ -72,10 +74,11 @@ func NewObfuscator(cfg DBSanitizerConfig) *Obfuscator {
 
 	if cfg.ValkeyConfig.Enabled {
 		attributes := createAttributes(cfg.ValkeyConfig.Attributes)
-		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0
+		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0 || cfg.ValkeyConfig.SanitizeAllAttributes
 		obfuscators = append(obfuscators, &valkeyObfuscator{
 			dbAttributes: dbAttributes{
-				attributes: attributes,
+				attributes:            attributes,
+				sanitizeAllAttributes: cfg.ValkeyConfig.SanitizeAllAttributes,
 			},
 			obfuscator: o,
 		})
@@ -83,10 +86,11 @@ func NewObfuscator(cfg DBSanitizerConfig) *Obfuscator {
 
 	if cfg.MemcachedConfig.Enabled {
 		attributes := createAttributes(cfg.MemcachedConfig.Attributes)
-		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0
+		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0 || cfg.MemcachedConfig.SanitizeAllAttributes
 		obfuscators = append(obfuscators, &memcachedObfuscator{
 			dbAttributes: dbAttributes{
-				attributes: attributes,
+				attributes:            attributes,
+				sanitizeAllAttributes: cfg.MemcachedConfig.SanitizeAllAttributes,
 			},
 			obfuscator: o,
 		})
@@ -94,10 +98,11 @@ func NewObfuscator(cfg DBSanitizerConfig) *Obfuscator {
 
 	if cfg.MongoConfig.Enabled {
 		attributes := createAttributes(cfg.MongoConfig.Attributes)
-		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0
+		processAttributesEnabled = processAttributesEnabled || len(attributes) > 0 || cfg.MongoConfig.SanitizeAllAttributes
 		obfuscators = append(obfuscators, &mongoObfuscator{
 			dbAttributes: dbAttributes{
-				attributes: attributes,
+				attributes:            attributes,
+				sanitizeAllAttributes: cfg.MongoConfig.SanitizeAllAttributes,
 			},
 			obfuscator: o,
 		})
@@ -105,9 +110,11 @@ func NewObfuscator(cfg DBSanitizerConfig) *Obfuscator {
 
 	if cfg.OpenSearchConfig.Enabled {
 		attributes := createAttributes([]string{})
+		processAttributesEnabled = processAttributesEnabled || cfg.OpenSearchConfig.SanitizeAllAttributes
 		obfuscators = append(obfuscators, &opensearchObfuscator{
 			dbAttributes: dbAttributes{
-				attributes: attributes,
+				attributes:            attributes,
+				sanitizeAllAttributes: cfg.OpenSearchConfig.SanitizeAllAttributes,
 			},
 			obfuscator: o,
 		})
@@ -115,9 +122,11 @@ func NewObfuscator(cfg DBSanitizerConfig) *Obfuscator {
 
 	if cfg.ESConfig.Enabled {
 		attributes := createAttributes([]string{})
+		processAttributesEnabled = processAttributesEnabled || cfg.ESConfig.SanitizeAllAttributes
 		obfuscators = append(obfuscators, &esObfuscator{
 			dbAttributes: dbAttributes{
-				attributes: attributes,
+				attributes:            attributes,
+				sanitizeAllAttributes: cfg.ESConfig.SanitizeAllAttributes,
 			},
 			obfuscator: o,
 		})

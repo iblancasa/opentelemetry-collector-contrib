@@ -20,6 +20,11 @@ type SQLConfig struct {
 	// If empty, SQL sanitization is applied to all string values in log bodies
 	// but not to span/metric attributes
 	Attributes []string `mapstructure:"attributes"`
+
+	// SanitizeAllAttributes specifies whether to sanitize all attributes.
+	// If true, SQL sanitization is applied to all string values in telemetry attributes.
+	// Log bodies will be sanitized as well.
+	SanitizeAllAttributes bool `mapstructure:"sanitize_all_attributes"`
 }
 
 type RedisConfig struct {
@@ -29,6 +34,11 @@ type RedisConfig struct {
 	// If empty, Redis sanitization is applied to all string values in log bodies
 	// but not to span/metric attributes
 	Attributes []string `mapstructure:"attributes"`
+
+	// SanitizeAllAttributes specifies whether to sanitize all attributes.
+	// If true, Redis sanitization is applied to all string values in telemetry attributes.
+	// Log bodies will be sanitized as well.
+	SanitizeAllAttributes bool `mapstructure:"sanitize_all_attributes"`
 }
 
 type ValkeyConfig struct {
@@ -38,6 +48,11 @@ type ValkeyConfig struct {
 	// If empty, Valkey sanitization is applied to all string values in log bodies
 	// but not to span/metric attributes
 	Attributes []string `mapstructure:"attributes"`
+
+	// SanitizeAllAttributes specifies whether to sanitize all attributes.
+	// If true, Valkey sanitization is applied to all string values in telemetry attributes.
+	// Log bodies will be sanitized as well.
+	SanitizeAllAttributes bool `mapstructure:"sanitize_all_attributes"`
 }
 
 type MemcachedConfig struct {
@@ -47,6 +62,11 @@ type MemcachedConfig struct {
 	// If empty, Memcached sanitization is applied to all string values in log bodies
 	// but not to span/metric attributes
 	Attributes []string `mapstructure:"attributes"`
+
+	// SanitizeAllAttributes specifies whether to sanitize all attributes.
+	// If true, Memcached sanitization is applied to all string values in telemetry attributes.
+	// Log bodies will be sanitized as well.
+	SanitizeAllAttributes bool `mapstructure:"sanitize_all_attributes"`
 }
 
 type MongoConfig struct {
@@ -56,6 +76,11 @@ type MongoConfig struct {
 	// If empty, MongoDB sanitization is applied to all string values in log bodies
 	// but not to span/metric attributes
 	Attributes []string `mapstructure:"attributes"`
+
+	// SanitizeAllAttributes specifies whether to sanitize all attributes.
+	// If true, MongoDB sanitization is applied to all string values in telemetry attributes.
+	// Log bodies will be sanitized as well.
+	SanitizeAllAttributes bool `mapstructure:"sanitize_all_attributes"`
 }
 
 type OpenSearchConfig struct {
@@ -65,6 +90,11 @@ type OpenSearchConfig struct {
 	// If empty, OpenSearch sanitization is applied to all string values in log bodies
 	// but not to span/metric attributes
 	Attributes []string `mapstructure:"attributes"`
+
+	// SanitizeAllAttributes specifies whether to sanitize all attributes.
+	// If true, OpenSearch sanitization is applied to all string values in telemetry attributes.
+	// Log bodies will be sanitized as well.
+	SanitizeAllAttributes bool `mapstructure:"sanitize_all_attributes"`
 }
 
 type ESConfig struct {
@@ -74,4 +104,9 @@ type ESConfig struct {
 	// If empty, Elasticsearch sanitization is applied to all string values in log bodies
 	// but not to span/metric attributes
 	Attributes []string `mapstructure:"attributes"`
+
+	// SanitizeAllAttributes specifies whether to sanitize all attributes.
+	// If true, Elasticsearch sanitization is applied to all string values in telemetry attributes.
+	// Log bodies will be sanitized as well.
+	SanitizeAllAttributes bool `mapstructure:"sanitize_all_attributes"`
 }

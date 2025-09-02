@@ -152,6 +152,36 @@ func TestNewObfuscator(t *testing.T) {
 			expectedObfuscatorCount: 2,
 			expectedProcessSpecific: false,
 		},
+		{
+			name: "sql enabled with sanitize_all_attributes",
+			config: DBSanitizerConfig{
+				SQLConfig: SQLConfig{
+					Enabled:               true,
+					SanitizeAllAttributes: true,
+				},
+			},
+			expectedObfuscatorCount: 1,
+			expectedProcessSpecific: true,
+		},
+		{
+			name: "multiple enabled with sanitize_all_attributes",
+			config: DBSanitizerConfig{
+				SQLConfig: SQLConfig{
+					Enabled:               true,
+					SanitizeAllAttributes: true,
+				},
+				RedisConfig: RedisConfig{
+					Enabled:               true,
+					SanitizeAllAttributes: true,
+				},
+				ValkeyConfig: ValkeyConfig{
+					Enabled:               true,
+					SanitizeAllAttributes: true,
+				},
+			},
+			expectedObfuscatorCount: 3,
+			expectedProcessSpecific: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -267,6 +297,46 @@ func TestObfuscateAttribute(t *testing.T) {
 			value:    "SELECT * FROM users",
 			key:      "db.statement",
 			expected: "SELECT * FROM users",
+			wantErr:  false,
+		},
+		{
+			name: "sanitize_all_attributes enabled - db attribute",
+			config: DBSanitizerConfig{
+				SQLConfig: SQLConfig{
+					Enabled:               true,
+					SanitizeAllAttributes: true,
+				},
+			},
+			value:    "SELECT * FROM users WHERE id = 123",
+			key:      "db.statement",
+			expected: "SELECT * FROM users WHERE id = ?",
+			wantErr:  false,
+		},
+		{
+			name: "sanitize_all_attributes enabled - non-db attribute",
+			config: DBSanitizerConfig{
+				SQLConfig: SQLConfig{
+					Enabled:               true,
+					SanitizeAllAttributes: true,
+				},
+			},
+			value:    "SELECT * FROM users WHERE id = 123",
+			key:      "custom.query",
+			expected: "SELECT * FROM users WHERE id = ?",
+			wantErr:  false,
+		},
+		{
+			name: "sanitize_all_attributes disabled with specific attributes",
+			config: DBSanitizerConfig{
+				SQLConfig: SQLConfig{
+					Enabled:               true,
+					Attributes:            []string{"db.statement"},
+					SanitizeAllAttributes: false,
+				},
+			},
+			value:    "SELECT * FROM users WHERE id = 123",
+			key:      "custom.query",
+			expected: "SELECT * FROM users WHERE id = 123",
 			wantErr:  false,
 		},
 	}

@@ -141,6 +141,7 @@ The redaction processor now supports sanitizing database queries and commands to
 
 - SQL databases
 - Redis
+- Valkey
 - Memcached
 - MongoDB
 - OpenSearch
@@ -158,28 +159,49 @@ processors:
       sql:
         enabled: true
         attributes: ["db.statement", "db.query"]
+        # sanitize_all_attributes: when true, sanitizes all string attributes
+        # regardless of the attributes list. Default is false.
+        sanitize_all_attributes: false
       redis:
         enabled: true
         attributes: ["db.statement", "redis.command"]
+        sanitize_all_attributes: false
       memcached:
         enabled: true
-        attributes: ["db.statement", "memcached.command"] 
+        attributes: ["db.statement", "memcached.command"]
+        sanitize_all_attributes: false
+      valkey:
+        enabled: true
+        attributes: ["db.statement", "valkey.command"]
+        sanitize_all_attributes: false
       mongo:
         enabled: true
         attributes: ["db.statement", "mongodb.query"]
+        sanitize_all_attributes: false
       opensearch:
         enabled: true
         attributes: ["db.statement", "opensearch.body"]
+        sanitize_all_attributes: false
       es:
         enabled: true
         attributes: ["db.statement", "elasticsearch.body"]
+        sanitize_all_attributes: false
 ```
 
 The database sanitizer will:
 - Remove sensitive data like literal values from SQL queries
 - Redact command arguments from Redis/Memcached commands
 - Sanitize MongoDB queries and JSON payloads
-- Process only specified attributes if provided
+- Process only specified attributes if provided, or all attributes when `sanitize_all_attributes` is true
 - Preserve query structure while removing sensitive data
+
+### Sanitize All Attributes
+
+Each database sanitizer supports a `sanitize_all_attributes` configuration option:
+- When `false` (default): Only processes attributes specified in the `attributes` list
+- When `true`: Processes all string attributes in telemetry data, regardless of the `attributes` list
+- Log bodies are always sanitized when the sanitizer is enabled
+
+This is useful when you want comprehensive protection without having to specify every possible attribute name that might contain database queries or commands.
 
 This provides an additional layer of protection when collecting telemetry that includes database operations.

@@ -85,6 +85,61 @@ func TestSQLObfuscator(t *testing.T) {
 	}
 }
 
+func TestSQLObfuscatorSanitizeAllAttributes(t *testing.T) {
+	o := &sqlObfuscator{
+		dbAttributes: dbAttributes{
+			attributes: map[string]bool{
+				"db.statement": true,
+			},
+			sanitizeAllAttributes: true,
+		},
+		obfuscator: obfuscate.NewObfuscator(obfuscate.Config{
+			SQL: obfuscate.SQLConfig{
+				ReplaceDigits: true,
+			},
+		}),
+	}
+
+	tests := []struct {
+		name          string
+		input         string
+		expected      string
+		attributeKey  string
+		shouldProcess bool
+	}{
+		{
+			name:          "db.statement with sanitize_all_attributes",
+			input:         "SELECT * FROM users WHERE id = 123",
+			expected:      "SELECT * FROM users WHERE id = ?",
+			attributeKey:  "db.statement",
+			shouldProcess: true,
+		},
+		{
+			name:          "custom attribute with sanitize_all_attributes",
+			input:         "SELECT * FROM users WHERE name = 'John'",
+			expected:      "SELECT * FROM users WHERE name = ?",
+			attributeKey:  "custom.query",
+			shouldProcess: true,
+		},
+		{
+			name:          "any attribute should be processed",
+			input:         "INSERT INTO users (name) VALUES ('Jane')",
+			expected:      "INSERT INTO users ( name ) VALUES ( ? )",
+			attributeKey:  "random.attribute",
+			shouldProcess: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := o.ObfuscateAttribute(tt.input, tt.attributeKey)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, tt.shouldProcess, o.ShouldProcessAttribute(tt.attributeKey))
+		})
+	}
+}
+
 func TestRedisObfuscator(t *testing.T) {
 	o := &redisObfuscator{
 		dbAttributes: dbAttributes{
@@ -139,6 +194,54 @@ func TestRedisObfuscator(t *testing.T) {
 			expected:      "SET key value",
 			attributeKey:  "other.field",
 			shouldProcess: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := o.ObfuscateAttribute(tt.input, tt.attributeKey)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, tt.shouldProcess, o.ShouldProcessAttribute(tt.attributeKey))
+		})
+	}
+}
+
+func TestRedisObfuscatorSanitizeAllAttributes(t *testing.T) {
+	o := &redisObfuscator{
+		dbAttributes: dbAttributes{
+			attributes: map[string]bool{
+				"db.statement": true,
+			},
+			sanitizeAllAttributes: true,
+		},
+		obfuscator: obfuscate.NewObfuscator(obfuscate.Config{
+			Redis: obfuscate.RedisConfig{
+				Enabled: true,
+			},
+		}),
+	}
+
+	tests := []struct {
+		name          string
+		input         string
+		expected      string
+		attributeKey  string
+		shouldProcess bool
+	}{
+		{
+			name:          "db.statement with sanitize_all_attributes",
+			input:         "SET user:123 john",
+			expected:      "SET user:123 ?",
+			attributeKey:  "db.statement",
+			shouldProcess: true,
+		},
+		{
+			name:          "custom attribute with sanitize_all_attributes",
+			input:         "GET user:456",
+			expected:      "GET user:456",
+			attributeKey:  "custom.command",
+			shouldProcess: true,
 		},
 	}
 
@@ -386,6 +489,47 @@ func TestValkeyObfuscator(t *testing.T) {
 			expected:      "SET key value",
 			attributeKey:  "other.field",
 			shouldProcess: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := o.ObfuscateAttribute(tt.input, tt.attributeKey)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, result)
+			assert.Equal(t, tt.shouldProcess, o.ShouldProcessAttribute(tt.attributeKey))
+		})
+	}
+}
+
+func TestValkeyObfuscatorSanitizeAllAttributes(t *testing.T) {
+	o := &valkeyObfuscator{
+		dbAttributes: dbAttributes{
+			attributes: map[string]bool{
+				"db.statement": true,
+			},
+			sanitizeAllAttributes: true,
+		},
+		obfuscator: obfuscate.NewObfuscator(obfuscate.Config{
+			Redis: obfuscate.RedisConfig{
+				Enabled: true,
+			},
+		}),
+	}
+
+	tests := []struct {
+		name          string
+		input         string
+		expected      string
+		attributeKey  string
+		shouldProcess bool
+	}{
+		{
+			name:          "custom attribute with sanitize_all_attributes",
+			input:         "SET key:789 value",
+			expected:      "SET key:789 ?",
+			attributeKey:  "custom.command",
+			shouldProcess: true,
 		},
 	}
 
