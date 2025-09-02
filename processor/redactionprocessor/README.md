@@ -108,6 +108,10 @@ processors:
       enabled: true
       # attributes is a list of attribute keys that contain URLs to be sanitized
       attributes: ["http.url", "url"]
+      # sanitize_all_attributes specifies whether to sanitize all attributes.
+      # If true, URL sanitization is applied to all string values in telemetry attributes.
+      # Log bodies and span names will be sanitized as well. Default is false.
+      sanitize_all_attributes: false
 ```
 
 Refer to [config.yaml](./testdata/config.yaml) for how to fit the configuration

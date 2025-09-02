@@ -1396,7 +1396,6 @@ func TestURLSanitizationAttributeFiltering(t *testing.T) {
 	outTraces := runTest(t, tc)
 	attr := outTraces.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0).Attributes()
 
-	// Configured attribute should be sanitized
 	httpURL, _ := attr.Get("http.url")
 	assert.Equal(t, "/users/*", httpURL.Str())
 
@@ -1427,4 +1426,104 @@ func TestURLSanitizationSpanName(t *testing.T) {
 
 	outSpan := outTraces.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0)
 	assert.Equal(t, "/users/*/profile", outSpan.Name())
+}
+
+func TestURLSanitizationSanitizeAllAttributes(t *testing.T) {
+	tc := testConfig{
+		config: &Config{
+			AllowAllKeys: true,
+			URLSanitization: url.URLSanitizationConfig{
+				Enabled:               true,
+				Attributes:            []string{"http.url"},
+				SanitizeAllAttributes: true,
+			},
+			Summary: "debug",
+		},
+		allowed: map[string]pcommon.Value{
+			"http.url":     pcommon.NewValueStr("/users/123"),
+			"request.path": pcommon.NewValueStr("/api/v1/products/456"),
+			"custom.url":   pcommon.NewValueStr("/orders/789/items/101"),
+			"other_field":  pcommon.NewValueStr("not-a-url"),
+		},
+	}
+
+	outTraces := runTest(t, tc)
+	outLogs := runLogsTest(t, tc)
+	outMetricsGauge := runMetricsTest(t, tc, pmetric.MetricTypeGauge)
+
+	attrs := []pcommon.Map{
+		outTraces.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0).Attributes(),
+		outLogs.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().At(0).Attributes(),
+		outMetricsGauge.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().At(0).Gauge().DataPoints().At(0).Attributes(),
+	}
+
+	for _, attr := range attrs {
+		httpURL, _ := attr.Get("http.url")
+		assert.Equal(t, "/users/*", httpURL.Str())
+
+		requestPath, _ := attr.Get("request.path")
+		assert.Equal(t, "/api/v1/products/*", requestPath.Str())
+
+		customURL, _ := attr.Get("custom.url")
+		assert.Equal(t, "/orders/*/items/*", customURL.Str())
+
+		otherField, _ := attr.Get("other_field")
+		assert.Equal(t, "not-a-url", otherField.Str())
+	}
+}
+
+func TestURLSanitizationSanitizeAllAttributesDisabled(t *testing.T) {
+	tc := testConfig{
+		config: &Config{
+			AllowAllKeys: true,
+			URLSanitization: url.URLSanitizationConfig{
+				Enabled:               true,
+				Attributes:            []string{"http.url"},
+				SanitizeAllAttributes: false,
+			},
+		},
+		allowed: map[string]pcommon.Value{
+			"http.url":     pcommon.NewValueStr("/users/123"),
+			"request.path": pcommon.NewValueStr("/api/v1/products/456"),
+		},
+	}
+
+	outTraces := runTest(t, tc)
+	attr := outTraces.ResourceSpans().At(0).ScopeSpans().At(0).Spans().At(0).Attributes()
+
+	httpURL, _ := attr.Get("http.url")
+	assert.Equal(t, "/users/*", httpURL.Str())
+
+	requestPath, _ := attr.Get("request.path")
+	assert.Equal(t, "/api/v1/products/456", requestPath.Str())
+}
+
+func TestURLSanitizationSanitizeAllAttributesInLogBody(t *testing.T) {
+	complexBody := pcommon.NewValueMap()
+	complexBody.Map().PutStr("message", "/users/123")
+	complexBody.Map().PutStr("api_path", "/products/456/details")
+	complexBody.Map().PutStr("non_url", "some text")
+
+	tc := testConfig{
+		config: &Config{
+			AllowAllKeys: true,
+			URLSanitization: url.URLSanitizationConfig{
+				Enabled:               true,
+				SanitizeAllAttributes: true,
+			},
+		},
+		logBody: &complexBody,
+	}
+
+	outLogs := runLogsTest(t, tc)
+	outLogBody := outLogs.ResourceLogs().At(0).ScopeLogs().At(0).LogRecords().At(0).Body()
+
+	message, _ := outLogBody.Map().Get("message")
+	assert.Equal(t, "/users/*", message.Str())
+
+	apiPath, _ := outLogBody.Map().Get("api_path")
+	assert.Equal(t, "/products/*/details", apiPath.Str())
+
+	nonURL, _ := outLogBody.Map().Get("non_url")
+	assert.Equal(t, "some text", nonURL.Str())
 }

@@ -10,8 +10,9 @@ import (
 )
 
 type URLSanitizer struct {
-	classifier *clusterurl.ClusterURLClassifier
-	attributes map[string]bool
+	classifier            *clusterurl.ClusterURLClassifier
+	attributes            map[string]bool
+	sanitizeAllAttributes bool
 }
 
 func NewURLSanitizer(config URLSanitizationConfig) (*URLSanitizer, error) {
@@ -26,8 +27,9 @@ func NewURLSanitizer(config URLSanitizationConfig) (*URLSanitizer, error) {
 	}
 
 	return &URLSanitizer{
-		classifier: classifier,
-		attributes: attributes,
+		classifier:            classifier,
+		attributes:            attributes,
+		sanitizeAllAttributes: config.SanitizeAllAttributes,
 	}, nil
 }
 
@@ -36,7 +38,7 @@ func (s *URLSanitizer) SanitizeAttributeURL(url, attributeKey string) string {
 		return url
 	}
 
-	if _, ok := s.attributes[attributeKey]; ok {
+	if _, ok := s.attributes[attributeKey]; ok || s.sanitizeAllAttributes {
 		return s.SanitizeURL(url)
 	}
 
