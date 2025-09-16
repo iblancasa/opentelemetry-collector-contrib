@@ -74,7 +74,7 @@ func newRedaction(ctx context.Context, config *Config, logger *zap.Logger) (*red
 
 	var urlSanitizer *url.URLSanitizer
 	if config.URLSanitization.Enabled {
-		urlSanitizer, err = url.NewURLSanitizer(config.URLSanitization)
+		urlSanitizer, err = url.NewURLSanitizer(config.URLSanitization, logger)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create URL sanitizer: %w", err)
 		}
@@ -141,8 +141,23 @@ func (s *redaction) processResourceSpan(ctx context.Context, rs ptrace.ResourceS
 			// Attributes can also be part of span events
 			s.processSpanEvents(ctx, span.Events())
 
-			if s.shouldRefactSpanName(&span) {
-				span.SetName(s.urlSanitizer.SanitizeURL(span.Name()))
+			if s.shouldRedactSpanName(&span) {
+				originalName := span.Name()
+				sanitizedName := s.urlSanitizer.SanitizeURL(originalName)
+				span.SetName(sanitizedName)
+				if originalName != sanitizedName {
+					s.logger.Debug("Span name was sanitized",
+						zap.String("original_name", originalName),
+						zap.String("sanitized_name", sanitizedName),
+						zap.String("span_kind", span.Kind().String()))
+				}
+			} else {
+				s.logger.Debug("Skipping span name sanitization",
+					zap.String("span_name", span.Name()),
+					zap.String("span_kind", span.Kind().String()),
+					zap.Bool("url_sanitizer_enabled", s.urlSanitizer != nil),
+					zap.Bool("span_name_contains_slash", strings.Contains(span.Name(), "/")),
+					zap.Bool("should_allow_value", s.shouldAllowValue(span.Name())))
 			}
 		}
 	}
@@ -417,7 +432,14 @@ func (s *redaction) processStringValueForAttribute(strVal, attributeKey string) 
 	}
 
 	if s.urlSanitizer != nil {
+		originalVal := strVal
 		strVal = s.urlSanitizer.SanitizeAttributeURL(strVal, attributeKey)
+		if originalVal != strVal {
+			s.logger.Debug("Attribute value was sanitized by URL sanitizer",
+				zap.String("attribute_key", attributeKey),
+				zap.String("original_value", originalVal),
+				zap.String("sanitized_value", strVal))
+		}
 	}
 
 	if s.dbObfuscator != nil {
@@ -467,10 +489,22 @@ func (s *redaction) shouldMaskKey(k string) bool {
 
 func (s *redaction) shouldAllowValue(strVal string) bool {
 	// Allow any values matching the allowed list regex
-	for _, compiledRE := range s.allowRegexList {
+	for pattern, compiledRE := range s.allowRegexList {
 		if match := compiledRE.MatchString(strVal); match {
+			s.logger.Debug("Value matched allow regex",
+				zap.String("value", strVal),
+				zap.String("pattern", pattern))
 			return true
 		}
+	}
+
+	if len(s.allowRegexList) == 0 {
+		s.logger.Debug("No allow regex patterns configured, value not allowed",
+			zap.String("value", strVal))
+	} else {
+		s.logger.Debug("Value did not match any allow regex patterns",
+			zap.String("value", strVal),
+			zap.Int("pattern_count", len(s.allowRegexList)))
 	}
 	return false
 }
@@ -491,20 +525,36 @@ func (s *redaction) shouldRedactKey(k string) bool {
 	return false
 }
 
-func (s *redaction) shouldRefactSpanName(span *ptrace.Span) bool {
+func (s *redaction) shouldRedactSpanName(span *ptrace.Span) bool {
+	spanName := span.Name()
+
 	if s.urlSanitizer == nil {
-		return false
-	}
-	spanKind := span.Kind()
-	if spanKind != ptrace.SpanKindClient && spanKind != ptrace.SpanKindServer {
+		s.logger.Debug("URL sanitizer not enabled for span name sanitization",
+			zap.String("span_name", spanName))
 		return false
 	}
 
-	spanName := span.Name()
-	if !strings.Contains(spanName, "/") {
+	spanKind := span.Kind()
+	if spanKind != ptrace.SpanKindClient && spanKind != ptrace.SpanKindServer {
+		s.logger.Debug("Span kind not eligible for name sanitization",
+			zap.String("span_name", spanName),
+			zap.String("span_kind", spanKind.String()))
 		return false
 	}
-	return s.shouldAllowValue(spanName)
+
+	if !strings.Contains(spanName, "/") {
+		s.logger.Debug("Span name does not contain slash, skipping sanitization",
+			zap.String("span_name", spanName))
+		return false
+	}
+
+	shouldAllow := s.shouldAllowValue(spanName)
+	s.logger.Debug("Checking if span name should be sanitized",
+		zap.String("span_name", spanName),
+		zap.Bool("should_allow_value", shouldAllow),
+		zap.Int("allow_regex_count", len(s.allowRegexList)))
+
+	return !shouldAllow
 }
 
 const (

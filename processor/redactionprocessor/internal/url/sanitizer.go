@@ -7,14 +7,16 @@ import (
 	"fmt"
 
 	"github.com/grafana/clusterurl/pkg/clusterurl"
+	"go.uber.org/zap"
 )
 
 type URLSanitizer struct {
 	classifier *clusterurl.ClusterURLClassifier
 	attributes map[string]bool
+	logger     *zap.Logger
 }
 
-func NewURLSanitizer(config URLSanitizationConfig) (*URLSanitizer, error) {
+func NewURLSanitizer(config URLSanitizationConfig, logger *zap.Logger) (*URLSanitizer, error) {
 	classifier, err := clusterurl.NewClusterURLClassifier(nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create cluster URL classifier: %w", err)
@@ -28,6 +30,7 @@ func NewURLSanitizer(config URLSanitizationConfig) (*URLSanitizer, error) {
 	return &URLSanitizer{
 		classifier: classifier,
 		attributes: attributes,
+		logger:     logger.Named("url_sanitizer"),
 	}, nil
 }
 
@@ -37,8 +40,23 @@ func (s *URLSanitizer) SanitizeAttributeURL(url, attributeKey string) string {
 	}
 
 	if _, ok := s.attributes[attributeKey]; ok {
-		return s.SanitizeURL(url)
+		s.logger.Debug("Sanitizing attribute URL",
+			zap.String("attribute_key", attributeKey),
+			zap.String("original_url", url))
+		sanitized := s.SanitizeURL(url)
+		if sanitized != url {
+			s.logger.Debug("URL was sanitized for attribute",
+				zap.String("attribute_key", attributeKey),
+				zap.String("original_url", url),
+				zap.String("sanitized_url", sanitized))
+		}
+		return sanitized
 	}
+
+	s.logger.Debug("Skipping URL sanitization - attribute not configured",
+		zap.String("attribute_key", attributeKey),
+		zap.String("url", url),
+		zap.Strings("configured_attributes", s.getConfiguredAttributes()))
 
 	return url
 }
@@ -46,5 +64,21 @@ func (s *URLSanitizer) SanitizeAttributeURL(url, attributeKey string) string {
 // SanitizeURL sanitizes the given URL by removing any gibberish words.
 // https://github.com/open-telemetry/opentelemetry-ebpf-instrumentation/blob/38ca7938595409b8ffe6b897c14a0e3280dd2941/pkg/components/transform/route/cluster.go#L48
 func (s *URLSanitizer) SanitizeURL(url string) string {
-	return s.classifier.ClusterURL(url)
+	s.logger.Debug("Sanitizing URL",
+		zap.String("original_url", url))
+	sanitized := s.classifier.ClusterURL(url)
+	if sanitized != url {
+		s.logger.Debug("URL was sanitized",
+			zap.String("original_url", url),
+			zap.String("sanitized_url", sanitized))
+	}
+	return sanitized
+}
+
+func (s *URLSanitizer) getConfiguredAttributes() []string {
+	attrs := make([]string, 0, len(s.attributes))
+	for attr := range s.attributes {
+		attrs = append(attrs, attr)
+	}
+	return attrs
 }
