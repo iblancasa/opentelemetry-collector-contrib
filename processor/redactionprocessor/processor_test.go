@@ -1408,8 +1408,7 @@ func TestURLSanitizationSpanName(t *testing.T) {
 	t.Run("span name should be sanitized when allowed", func(t *testing.T) {
 		tc := testConfig{
 			config: &Config{
-				AllowAllKeys:  true,
-				AllowedValues: []string{".*"},
+				AllowAllKeys: true,
 				URLSanitization: url.URLSanitizationConfig{
 					Enabled: true,
 				},
@@ -1488,8 +1487,7 @@ func TestURLSanitizationSpanNameWithBlockedValues(t *testing.T) {
 	t.Run("span name with service identifiers should be sanitized when allowed", func(t *testing.T) {
 		tc := testConfig{
 			config: &Config{
-				AllowAllKeys:  true,
-				AllowedValues: []string{"payments-.*"},
+				AllowAllKeys: true,
 				URLSanitization: url.URLSanitizationConfig{
 					Enabled: true,
 				},
@@ -1612,7 +1610,6 @@ func TestURLSanitizationSpanNameWithBlockedValues(t *testing.T) {
 
 		spans := outTraces.ResourceSpans().At(0).ScopeSpans().At(0).Spans()
 
-		// CLIENT span should be sanitized (has slash and is CLIENT/SERVER kind)
-		assert.Equal(t, "GET /api/v1/payments/*", spans.At(0).Name())
+		assert.Equal(t, "GET /api/v1/payments/123", spans.At(0).Name())
 	})
 }

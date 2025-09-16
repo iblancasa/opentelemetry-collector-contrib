@@ -74,12 +74,32 @@ func newRedaction(ctx context.Context, config *Config, logger *zap.Logger) (*red
 
 	var urlSanitizer *url.URLSanitizer
 	if config.URLSanitization.Enabled {
+		logger.Debug("Creating URL sanitizer",
+			zap.Bool("url_sanitization_enabled", config.URLSanitization.Enabled),
+			zap.Strings("url_sanitization_attributes", config.URLSanitization.Attributes))
 		urlSanitizer, err = url.NewURLSanitizer(config.URLSanitization, logger)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create URL sanitizer: %w", err)
 		}
+		logger.Info("URL sanitizer created successfully",
+			zap.Strings("configured_attributes", config.URLSanitization.Attributes))
+	} else {
+		logger.Debug("URL sanitization is disabled")
 	}
 	dbObfuscator := db.NewObfuscator(config.DBSanitizer)
+
+	logger.Debug("Redaction processor configuration",
+		zap.Bool("allow_all_keys", config.AllowAllKeys),
+		zap.Int("allowed_keys_count", len(config.AllowedKeys)),
+		zap.Strings("allowed_keys", config.AllowedKeys),
+		zap.Int("blocked_values_count", len(config.BlockedValues)),
+		zap.Int("allowed_values_count", len(config.AllowedValues)),
+		zap.Strings("allowed_values", config.AllowedValues),
+		zap.Int("ignored_keys_count", len(config.IgnoredKeys)),
+		zap.Strings("ignored_keys", config.IgnoredKeys),
+		zap.Bool("redact_all_types", config.RedactAllTypes),
+		zap.String("summary", config.Summary),
+		zap.String("hash_function", config.HashFunction.String()))
 
 	return &redaction{
 		allowList:         allowList,
@@ -98,10 +118,32 @@ func newRedaction(ctx context.Context, config *Config, logger *zap.Logger) (*red
 // processTraces implements ProcessMetricsFunc. It processes the incoming data
 // and returns the data to be sent to the next component
 func (s *redaction) processTraces(ctx context.Context, batch ptrace.Traces) (ptrace.Traces, error) {
+	totalSpans := 0
+	totalResourceSpans := batch.ResourceSpans().Len()
+
+	// Count total spans for logging
+	for i := 0; i < batch.ResourceSpans().Len(); i++ {
+		rs := batch.ResourceSpans().At(i)
+		for j := 0; j < rs.ScopeSpans().Len(); j++ {
+			ils := rs.ScopeSpans().At(j)
+			totalSpans += ils.Spans().Len()
+		}
+	}
+
+	s.logger.Debug("Processing traces batch",
+		zap.Int("resource_spans_count", totalResourceSpans),
+		zap.Int("total_spans_count", totalSpans),
+		zap.Bool("url_sanitizer_enabled", s.urlSanitizer != nil))
+
 	for i := 0; i < batch.ResourceSpans().Len(); i++ {
 		rs := batch.ResourceSpans().At(i)
 		s.processResourceSpan(ctx, rs)
 	}
+
+	s.logger.Debug("Finished processing traces batch",
+		zap.Int("processed_resource_spans", totalResourceSpans),
+		zap.Int("processed_spans", totalSpans))
+
 	return batch, nil
 }
 
@@ -125,15 +167,41 @@ func (s *redaction) processMetrics(ctx context.Context, metrics pmetric.Metrics)
 // view metric context. The context can be used for tests
 func (s *redaction) processResourceSpan(ctx context.Context, rs ptrace.ResourceSpans) {
 	rsAttrs := rs.Resource().Attributes()
+	totalSpansInResource := 0
+
+	// Count spans in this resource
+	for j := 0; j < rs.ScopeSpans().Len(); j++ {
+		ils := rs.ScopeSpans().At(j)
+		totalSpansInResource += ils.Spans().Len()
+	}
+
+	s.logger.Debug("Processing resource span",
+		zap.Int("scope_spans_count", rs.ScopeSpans().Len()),
+		zap.Int("total_spans_in_resource", totalSpansInResource),
+		zap.Int("resource_attributes_count", rsAttrs.Len()))
 
 	// Attributes can be part of a resource span
 	s.processAttrs(ctx, rsAttrs)
 
+	spansSanitized := 0
+	spansSkipped := 0
+
 	for j := 0; j < rs.ScopeSpans().Len(); j++ {
 		ils := rs.ScopeSpans().At(j)
+		s.logger.Debug("Processing scope span",
+			zap.Int("scope_index", j),
+			zap.Int("spans_count", ils.Spans().Len()))
+
 		for k := 0; k < ils.Spans().Len(); k++ {
 			span := ils.Spans().At(k)
 			spanAttrs := span.Attributes()
+
+			s.logger.Debug("Processing individual span",
+				zap.String("span_name", span.Name()),
+				zap.String("span_kind", span.Kind().String()),
+				zap.String("span_id", span.SpanID().String()),
+				zap.Int("span_attributes_count", spanAttrs.Len()),
+				zap.Int("span_events_count", span.Events().Len()))
 
 			// Attributes can also be part of span
 			s.processAttrs(ctx, spanAttrs)
@@ -146,21 +214,35 @@ func (s *redaction) processResourceSpan(ctx context.Context, rs ptrace.ResourceS
 				sanitizedName := s.urlSanitizer.SanitizeURL(originalName)
 				span.SetName(sanitizedName)
 				if originalName != sanitizedName {
+					spansSanitized++
 					s.logger.Debug("Span name was sanitized",
 						zap.String("original_name", originalName),
 						zap.String("sanitized_name", sanitizedName),
-						zap.String("span_kind", span.Kind().String()))
+						zap.String("span_kind", span.Kind().String()),
+						zap.String("span_id", span.SpanID().String()))
+				} else {
+					s.logger.Debug("Span name did not change after sanitization",
+						zap.String("span_name", originalName),
+						zap.String("span_kind", span.Kind().String()),
+						zap.String("span_id", span.SpanID().String()))
 				}
 			} else {
+				spansSkipped++
 				s.logger.Debug("Skipping span name sanitization",
 					zap.String("span_name", span.Name()),
 					zap.String("span_kind", span.Kind().String()),
+					zap.String("span_id", span.SpanID().String()),
 					zap.Bool("url_sanitizer_enabled", s.urlSanitizer != nil),
 					zap.Bool("span_name_contains_slash", strings.Contains(span.Name(), "/")),
 					zap.Bool("should_allow_value", s.shouldAllowValue(span.Name())))
 			}
 		}
 	}
+
+	s.logger.Debug("Finished processing resource span",
+		zap.Int("total_spans_processed", totalSpansInResource),
+		zap.Int("spans_sanitized", spansSanitized),
+		zap.Int("spans_skipped", spansSkipped))
 }
 
 func (s *redaction) processSpanEvents(ctx context.Context, events ptrace.SpanEventSlice) {
@@ -327,6 +409,19 @@ func (s *redaction) processResourceMetric(ctx context.Context, rm pmetric.Resour
 func (s *redaction) processAttrs(_ context.Context, attributes pcommon.Map) {
 	// TODO: Use the context for recording metrics
 	var redactedKeys, maskedKeys, allowedKeys, ignoredKeys []string
+	originalAttrCount := attributes.Len()
+
+	s.logger.Debug("Processing attributes",
+		zap.Int("original_attribute_count", originalAttrCount),
+		zap.Bool("allow_all_keys", s.config.AllowAllKeys),
+		zap.Bool("redact_all_types", s.config.RedactAllTypes))
+
+	// Log all attribute keys for debugging
+	attrKeys := make([]string, 0, attributes.Len())
+	for k := range attributes.All() {
+		attrKeys = append(attrKeys, k)
+	}
+	s.logger.Debug("Attribute keys being processed", zap.Strings("attribute_keys", attrKeys))
 
 	// Identify attributes to redact and mask in the following sequence
 	// 1. Make a list of attribute keys to redact
@@ -339,10 +434,12 @@ func (s *redaction) processAttrs(_ context.Context, attributes pcommon.Map) {
 	for k, value := range attributes.All() {
 		if s.shouldIgnoreKey(k) {
 			ignoredKeys = append(ignoredKeys, k)
+			s.logger.Debug("Ignoring attribute key", zap.String("key", k))
 			continue
 		}
 		if s.shouldRedactKey(k) {
 			redactedKeys = append(redactedKeys, k)
+			s.logger.Debug("Redacting attribute key", zap.String("key", k))
 			continue
 		}
 		strVal := value.Str()
@@ -352,18 +449,25 @@ func (s *redaction) processAttrs(_ context.Context, attributes pcommon.Map) {
 
 		if s.shouldAllowValue(strVal) {
 			allowedKeys = append(allowedKeys, k)
+			s.logger.Debug("Allowing attribute value", zap.String("key", k), zap.String("value", strVal))
 			continue
 		}
 		if s.shouldMaskKey(k) {
 			maskedKeys = append(maskedKeys, k)
 			maskedValue := s.maskValue(strVal, regexp.MustCompile(".*"))
+			s.logger.Debug("Masking attribute key", zap.String("key", k), zap.String("original_value", strVal), zap.String("masked_value", maskedValue))
 			value.SetStr(maskedValue)
 			continue
 		}
+
+		originalValue := strVal
 		processedString := s.processStringValueForAttribute(strVal, k)
 		if processedString != strVal {
 			maskedKeys = append(maskedKeys, k)
+			s.logger.Debug("Attribute value processed", zap.String("key", k), zap.String("original_value", originalValue), zap.String("processed_value", processedString))
 			value.SetStr(processedString)
+		} else {
+			s.logger.Debug("Attribute value unchanged", zap.String("key", k), zap.String("value", strVal))
 		}
 	}
 
@@ -371,6 +475,17 @@ func (s *redaction) processAttrs(_ context.Context, attributes pcommon.Map) {
 	for _, k := range redactedKeys {
 		attributes.Remove(k)
 	}
+
+	s.logger.Debug("Attribute processing completed",
+		zap.Int("original_count", originalAttrCount),
+		zap.Int("final_count", attributes.Len()),
+		zap.Int("redacted_count", len(redactedKeys)),
+		zap.Int("masked_count", len(maskedKeys)),
+		zap.Int("allowed_count", len(allowedKeys)),
+		zap.Int("ignored_count", len(ignoredKeys)),
+		zap.Strings("redacted_keys", redactedKeys),
+		zap.Strings("masked_keys", maskedKeys))
+
 	// Add diagnostic information to the span
 	s.addMetaAttrs(redactedKeys, attributes, redactionRedactedKeys, redactionRedactedCount)
 	s.addMetaAttrs(maskedKeys, attributes, redactionMaskedKeys, redactionMaskedCount)
@@ -424,30 +539,66 @@ func (s *redaction) addMetaAttrs(redactedAttrs []string, attributes pcommon.Map,
 }
 
 func (s *redaction) processStringValueForAttribute(strVal, attributeKey string) string {
-	for _, compiledRE := range s.blockRegexList {
+	originalValue := strVal
+
+	s.logger.Debug("Processing string value for attribute",
+		zap.String("attribute_key", attributeKey),
+		zap.String("original_value", strVal),
+		zap.Int("block_regex_count", len(s.blockRegexList)),
+		zap.Bool("url_sanitizer_enabled", s.urlSanitizer != nil),
+		zap.Bool("db_obfuscator_enabled", s.dbObfuscator != nil))
+
+	// Apply blocked value patterns
+	for pattern, compiledRE := range s.blockRegexList {
 		match := compiledRE.MatchString(strVal)
 		if match {
-			strVal = s.maskValue(strVal, compiledRE)
+			maskedValue := s.maskValue(strVal, compiledRE)
+			s.logger.Debug("Value matched block regex pattern",
+				zap.String("attribute_key", attributeKey),
+				zap.String("pattern", pattern),
+				zap.String("original_value", strVal),
+				zap.String("masked_value", maskedValue))
+			strVal = maskedValue
 		}
 	}
 
+	// Apply URL sanitization
 	if s.urlSanitizer != nil {
-		originalVal := strVal
+		preUrlSanitization := strVal
 		strVal = s.urlSanitizer.SanitizeAttributeURL(strVal, attributeKey)
-		if originalVal != strVal {
+		if preUrlSanitization != strVal {
 			s.logger.Debug("Attribute value was sanitized by URL sanitizer",
 				zap.String("attribute_key", attributeKey),
-				zap.String("original_value", originalVal),
+				zap.String("original_value", preUrlSanitization),
 				zap.String("sanitized_value", strVal))
 		}
 	}
 
+	// Apply database obfuscation
 	if s.dbObfuscator != nil {
+		preDbObfuscation := strVal
 		obfuscatedQuery, err := s.dbObfuscator.ObfuscateAttribute(strVal, attributeKey)
 		if err != nil {
+			s.logger.Debug("DB obfuscation failed",
+				zap.String("attribute_key", attributeKey),
+				zap.String("value", strVal),
+				zap.Error(err))
 			return strVal
 		}
+		if preDbObfuscation != obfuscatedQuery {
+			s.logger.Debug("Attribute value was obfuscated by DB obfuscator",
+				zap.String("attribute_key", attributeKey),
+				zap.String("original_value", preDbObfuscation),
+				zap.String("obfuscated_value", obfuscatedQuery))
+		}
 		strVal = obfuscatedQuery
+	}
+
+	if originalValue != strVal {
+		s.logger.Debug("Final attribute value transformation",
+			zap.String("attribute_key", attributeKey),
+			zap.String("original_value", originalValue),
+			zap.String("final_value", strVal))
 	}
 
 	return strVal
