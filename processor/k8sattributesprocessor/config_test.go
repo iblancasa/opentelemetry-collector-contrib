@@ -30,7 +30,7 @@ func TestLoadConfig(t *testing.T) {
 				APIConfig: k8sconfig.APIConfig{AuthType: k8sconfig.AuthTypeServiceAccount},
 				Exclude:   ExcludeConfig{Pods: []ExcludePodConfig{{Name: "jaeger-agent"}, {Name: "jaeger-collector"}}},
 				Extract: ExtractConfig{
-					Metadata: enabledAttributes(),
+					Metadata: func() *[]string { m := enabledAttributes(); return &m }(),
 				},
 				WaitForMetadataTimeout: 10 * time.Second,
 			},
@@ -41,7 +41,7 @@ func TestLoadConfig(t *testing.T) {
 				APIConfig:   k8sconfig.APIConfig{AuthType: k8sconfig.AuthTypeKubeConfig},
 				Passthrough: false,
 				Extract: ExtractConfig{
-					Metadata: []string{"k8s.pod.name", "k8s.pod.uid", "k8s.pod.ip", "k8s.deployment.name", "k8s.namespace.name", "k8s.node.name", "k8s.pod.start_time", "k8s.cluster.uid"},
+					Metadata: func() *[]string { m := []string{"k8s.pod.name", "k8s.pod.uid", "k8s.pod.ip", "k8s.deployment.name", "k8s.namespace.name", "k8s.node.name", "k8s.pod.start_time", "k8s.cluster.uid"}; return &m }(),
 					Annotations: []FieldExtractConfig{
 						{TagName: "a1", Key: "annotation-one", From: "pod"},
 						{TagName: "a2", Key: "annotation-two", From: kube.MetadataFromPod},
@@ -119,7 +119,7 @@ func TestLoadConfig(t *testing.T) {
 					Labels: []FieldExtractConfig{
 						{KeyRegex: "opentel.*", From: kube.MetadataFromPod},
 					},
-					Metadata: enabledAttributes(),
+					Metadata: func() *[]string { m := enabledAttributes(); return &m }(),
 				},
 				Exclude: ExcludeConfig{
 					Pods: []ExcludePodConfig{
@@ -135,7 +135,7 @@ func TestLoadConfig(t *testing.T) {
 			expected: &Config{
 				APIConfig: k8sconfig.APIConfig{AuthType: k8sconfig.AuthTypeServiceAccount},
 				Extract: ExtractConfig{
-					Metadata:                     enabledAttributes(),
+					Metadata:                     func() *[]string { m := enabledAttributes(); return &m }(),
 					DeploymentNameFromReplicaSet: true,
 				},
 				Exclude:                defaultExcludes,
@@ -168,6 +168,17 @@ func TestLoadConfig(t *testing.T) {
 		},
 		{
 			id: component.NewIDWithName(metadata.Type, "bad_filter_field_op"),
+		},
+		{
+			id: component.NewIDWithName(metadata.Type, "empty_metadata"),
+			expected: &Config{
+				APIConfig: k8sconfig.APIConfig{AuthType: k8sconfig.AuthTypeServiceAccount},
+				Exclude:   ExcludeConfig{Pods: []ExcludePodConfig{{Name: "jaeger-agent"}, {Name: "jaeger-collector"}}},
+				Extract: ExtractConfig{
+					Metadata: func() *[]string { m := []string{}; return &m }(), // Explicitly empty
+				},
+				WaitForMetadataTimeout: 10 * time.Second,
+			},
 		},
 	}
 

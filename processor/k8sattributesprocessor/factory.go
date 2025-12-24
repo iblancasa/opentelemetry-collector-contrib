@@ -39,11 +39,12 @@ func NewFactory() processor.Factory {
 }
 
 func createDefaultConfig() component.Config {
+	defaultMetadata := enabledAttributes()
 	return &Config{
 		APIConfig: k8sconfig.APIConfig{AuthType: k8sconfig.AuthTypeServiceAccount},
 		Exclude:   defaultExcludes,
 		Extract: ExtractConfig{
-			Metadata: enabledAttributes(),
+			Metadata: &defaultMetadata,
 		},
 		WaitForMetadataTimeout: 10 * time.Second,
 	}
@@ -189,8 +190,17 @@ func createProcessorOpts(cfg component.Config) []option {
 	}
 
 	// extraction rules
+	// Apply defaults only if metadata is nil (not set). If metadata is explicitly set to empty (non-nil empty slice),
+	// don't apply defaults to allow users to disable all metadata extraction.
+	metadata := oCfg.Extract.Metadata
+	if metadata == nil {
+		// Metadata not set, apply defaults
+		defaultAttrs := enabledAttributes()
+		metadata = &defaultAttrs
+	}
+	
 	opts = append(opts,
-		withExtractMetadata(oCfg.Extract.Metadata...),
+		withExtractMetadata(*metadata...),
 		withExtractLabels(oCfg.Extract.Labels...),
 		withExtractAnnotations(oCfg.Extract.Annotations...),
 		withOtelAnnotations(oCfg.Extract.OtelAnnotations),

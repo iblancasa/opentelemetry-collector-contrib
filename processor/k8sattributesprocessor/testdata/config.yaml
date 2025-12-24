@@ -156,6 +156,11 @@ k8sattributes/bad_filter_label_op:
 k8sattributes/deployment_name_from_replicaset:
   extract:
     deployment_name_from_replicaset: true
+
+k8sattributes/empty_metadata:
+  extract:
+    metadata: []
+
 k8sattributes/bad_filter_field_op:
   filter:
     fields:

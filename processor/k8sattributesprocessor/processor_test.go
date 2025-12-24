@@ -798,7 +798,8 @@ func TestAddNamespaceLabels(t *testing.T) {
 		t,
 		func() component.Config {
 			cfg := createDefaultConfig().(*Config)
-			cfg.Extract.Metadata = []string{"service.namespace"}
+			m := []string{"service.namespace"}
+			cfg.Extract.Metadata = &m
 			cfg.Extract.Labels = []FieldExtractConfig{
 				{
 					From: kube.MetadataFromNamespace,
@@ -874,7 +875,8 @@ func TestServiceNamespaceAnnotationTakesPrecedence(t *testing.T) {
 		t,
 		func() component.Config {
 			cfg := createDefaultConfig().(*Config)
-			cfg.Extract.Metadata = []string{"service.namespace", "k8s.pod.ip"}
+			m := []string{"service.namespace", "k8s.pod.ip"}
+			cfg.Extract.Metadata = &m
 			return cfg
 		}(),
 		nil,
@@ -936,7 +938,8 @@ func TestAddNodeLabels(t *testing.T) {
 		t,
 		func() component.Config {
 			cfg := createDefaultConfig().(*Config)
-			cfg.Extract.Metadata = []string{}
+			m := []string{}
+			cfg.Extract.Metadata = &m
 			cfg.Extract.Labels = []FieldExtractConfig{
 				{
 					From: kube.MetadataFromNode,
@@ -1009,7 +1012,8 @@ func TestAddNodeUID(t *testing.T) {
 		t,
 		func() component.Config {
 			cfg := createDefaultConfig().(*Config)
-			cfg.Extract.Metadata = []string{"k8s.node.uid"}
+			m := []string{"k8s.node.uid"}
+			cfg.Extract.Metadata = &m
 			cfg.Extract.Labels = []FieldExtractConfig{}
 			return cfg
 		}(),

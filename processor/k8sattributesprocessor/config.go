@@ -78,24 +78,26 @@ func (cfg *Config) Validate() error {
 		}
 	}
 
-	for _, field := range cfg.Extract.Metadata {
-		switch field {
-		case string(conventions.K8SNamespaceNameKey), string(conventions.K8SPodNameKey), string(conventions.K8SPodUIDKey),
-			specPodHostName, metadataPodStartTime, metadataPodIP,
-			string(conventions.K8SDeploymentNameKey), string(conventions.K8SDeploymentUIDKey),
-			string(conventions.K8SReplicaSetNameKey), string(conventions.K8SReplicaSetUIDKey),
-			string(conventions.K8SDaemonSetNameKey), string(conventions.K8SDaemonSetUIDKey),
-			string(conventions.K8SStatefulSetNameKey), string(conventions.K8SStatefulSetUIDKey),
-			string(conventions.K8SJobNameKey), string(conventions.K8SJobUIDKey),
-			string(conventions.K8SCronJobNameKey), string(conventions.K8SCronJobUIDKey),
-			string(conventions.K8SNodeNameKey), string(conventions.K8SNodeUIDKey),
-			string(conventions.K8SContainerNameKey), string(conventions.ContainerIDKey),
-			string(conventions.ContainerImageNameKey), containerImageTag,
-			string(conventions.ServiceNamespaceKey), string(conventions.ServiceNameKey),
-			string(conventions.ServiceVersionKey), string(conventions.ServiceInstanceIDKey),
-			string(conventions.ContainerImageRepoDigestsKey), string(conventions.K8SClusterUIDKey):
-		default:
-			return fmt.Errorf("\"%s\" is not a supported metadata field", field)
+	if cfg.Extract.Metadata != nil {
+		for _, field := range *cfg.Extract.Metadata {
+			switch field {
+			case string(conventions.K8SNamespaceNameKey), string(conventions.K8SPodNameKey), string(conventions.K8SPodUIDKey),
+				specPodHostName, metadataPodStartTime, metadataPodIP,
+				string(conventions.K8SDeploymentNameKey), string(conventions.K8SDeploymentUIDKey),
+				string(conventions.K8SReplicaSetNameKey), string(conventions.K8SReplicaSetUIDKey),
+				string(conventions.K8SDaemonSetNameKey), string(conventions.K8SDaemonSetUIDKey),
+				string(conventions.K8SStatefulSetNameKey), string(conventions.K8SStatefulSetUIDKey),
+				string(conventions.K8SJobNameKey), string(conventions.K8SJobUIDKey),
+				string(conventions.K8SCronJobNameKey), string(conventions.K8SCronJobUIDKey),
+				string(conventions.K8SNodeNameKey), string(conventions.K8SNodeUIDKey),
+				string(conventions.K8SContainerNameKey), string(conventions.ContainerIDKey),
+				string(conventions.ContainerImageNameKey), containerImageTag,
+				string(conventions.ServiceNamespaceKey), string(conventions.ServiceNameKey),
+				string(conventions.ServiceVersionKey), string(conventions.ServiceInstanceIDKey),
+				string(conventions.ContainerImageRepoDigestsKey), string(conventions.K8SClusterUIDKey):
+			default:
+				return fmt.Errorf("\"%s\" is not a supported metadata field", field)
+			}
 		}
 	}
 
@@ -147,7 +149,9 @@ type ExtractConfig struct {
 	//  - k8s.container.name (requires an additional attribute to be set: container.id)
 	//  - container.image.name (requires one of the following additional attributes to be set: container.id or k8s.container.name)
 	//  - container.image.tag (requires one of the following additional attributes to be set: container.id or k8s.container.name)
-	Metadata []string `mapstructure:"metadata"`
+	// If set to nil (not specified), defaults are applied. If set to an empty list ([]), no metadata extraction is performed.
+	// Using a pointer to distinguish between nil (not set, use defaults) and empty slice (explicitly disabled).
+	Metadata *[]string `mapstructure:"metadata"`
 
 	// Annotations allows extracting data from pod annotations and record it
 	// as resource attributes.
