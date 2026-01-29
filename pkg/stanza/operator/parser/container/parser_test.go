@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 
@@ -688,6 +689,75 @@ func TestProcessWithIfCondition(t *testing.T) {
 			require.Equal(t, tc.expectedOutput, tc.input)
 		})
 	}
+}
+
+func TestContainerParserDoesNotSplitBatches(t *testing.T) {
+	output := testutil.NewMockOperator("test-output")
+	output.On("ProcessBatch", mock.Anything, mock.Anything).Return(nil)
+
+	cfg := NewConfigWithID("test_id")
+	cfg.Format = dockerFormat
+	cfg.AddMetadataFromFilePath = false
+	cfg.OutputIDs = []string{"test-output"}
+
+	set := componenttest.NewNopTelemetrySettings()
+	op, err := cfg.Build(set)
+	require.NoError(t, err)
+
+	require.NoError(t, op.SetOutputs([]operator.Operator{output}))
+
+	entry1 := entry.New()
+	entry1.Body = `{"log":"INFO: log line one","stream":"stdout","time":"2029-03-30T08:31:20.545Z"}`
+
+	entry2 := entry.New()
+	entry2.Body = `{"log":"INFO: log line two","stream":"stdout","time":"2029-03-30T08:31:20.545Z"}`
+
+	entry3 := entry.New()
+	entry3.Body = `{"log":"INFO: log line three","stream":"stdout","time":"2029-03-30T08:31:20.545Z"}`
+
+	entries := []*entry.Entry{entry1, entry2, entry3}
+
+	err = op.ProcessBatch(t.Context(), entries)
+	require.NoError(t, err)
+
+	output.AssertCalled(t, "ProcessBatch", mock.Anything, mock.MatchedBy(func(batch []*entry.Entry) bool {
+		return len(batch) == 3
+	}))
+	output.AssertNumberOfCalls(t, "ProcessBatch", 1)
+	output.AssertNotCalled(t, "Process", mock.Anything, mock.Anything)
+}
+
+func TestContainerParserContainerdBatching(t *testing.T) {
+	output := testutil.NewMockOperator("test-output")
+	output.On("ProcessBatch", mock.Anything, mock.Anything).Return(nil)
+
+	cfg := NewConfigWithID("test_id")
+	cfg.Format = containerdFormat
+	cfg.AddMetadataFromFilePath = false
+	cfg.OutputIDs = []string{"test-output"}
+
+	set := componenttest.NewNopTelemetrySettings()
+	op, err := cfg.Build(set)
+	require.NoError(t, err)
+
+	require.NoError(t, op.SetOutputs([]operator.Operator{output}))
+
+	entry1 := entry.New()
+	entry1.Body = "2029-03-30T08:31:20.545Z stdout F first containerd line"
+
+	entry2 := entry.New()
+	entry2.Body = "2029-03-30T08:31:20.545Z stdout F second containerd line"
+
+	err = op.ProcessBatch(t.Context(), []*entry.Entry{entry1, entry2})
+	require.NoError(t, err)
+
+	require.NoError(t, op.Stop())
+
+	output.AssertCalled(t, "ProcessBatch", mock.Anything, mock.MatchedBy(func(batch []*entry.Entry) bool {
+		return len(batch) == 2
+	}))
+	output.AssertNumberOfCalls(t, "ProcessBatch", 1)
+	output.AssertNotCalled(t, "Process", mock.Anything, mock.Anything)
 }
 
 func TestProcessWithOnErrorSendQuiet(t *testing.T) {

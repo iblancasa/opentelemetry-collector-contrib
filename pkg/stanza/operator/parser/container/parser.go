@@ -71,7 +71,103 @@ type Parser struct {
 }
 
 func (p *Parser) ProcessBatch(ctx context.Context, entries []*entry.Entry) error {
-	return p.TransformerOperator.ProcessBatchWith(ctx, entries, p.Process)
+	processedEntries := make([]*entry.Entry, 0, len(entries))
+	recombineEntries := make([]*entry.Entry, 0, len(entries))
+	write := func(_ context.Context, ent *entry.Entry) error {
+		processedEntries = append(processedEntries, ent)
+		return nil
+	}
+
+	var errs []error
+	for _, ent := range entries {
+		skip, err := p.Skip(ctx, ent)
+		if err != nil {
+			errs = append(errs, p.HandleEntryErrorWithWrite(ctx, ent, err, write))
+			continue
+		}
+		if skip {
+			_ = write(ctx, ent)
+			continue
+		}
+
+		format := p.format
+		if format == "" {
+			format, err = p.detectFormat(ent)
+			if err != nil {
+				errs = append(errs, p.HandleEntryErrorWithWrite(ctx, ent, fmt.Errorf("failed to detect a valid container log format: %w", err), write))
+				continue
+			}
+		}
+
+		switch format {
+		case dockerFormat:
+			p.timeLayout = goTimeLayout
+			if err = p.ParseWith(ctx, ent, p.parseDocker, write); err != nil {
+				if p.OnError != helper.DropOnErrorQuiet && p.OnError != helper.SendOnErrorQuiet {
+					errs = append(errs, fmt.Errorf("failed to process the docker log: %w", err))
+				}
+				continue
+			}
+
+			if err = p.handleTimeAndAttributeMappings(ent); err != nil {
+				errs = append(errs, p.HandleEntryErrorWithWrite(ctx, ent, err, write))
+				continue
+			}
+
+			_ = write(ctx, ent)
+		case containerdFormat, crioFormat:
+			p.criConsumerStartOnce.Do(func() {
+				if err = p.criLogEmitter.Start(nil); err != nil {
+					p.Logger().Error("unable to start the internal LogEmitter", zap.Error(err))
+					return
+				}
+				if err = p.recombineParser.Start(nil); err != nil {
+					p.Logger().Error("unable to start the internal recombine operator", zap.Error(err))
+					return
+				}
+				p.asyncConsumerStarted = true
+			})
+
+			if format == containerdFormat {
+				if err = p.ParseWith(ctx, ent, p.parseContainerd, write); err != nil {
+					if p.OnError != helper.DropOnErrorQuiet && p.OnError != helper.SendOnErrorQuiet {
+						errs = append(errs, fmt.Errorf("failed to parse containerd log: %w", err))
+					}
+					continue
+				}
+				p.timeLayout = goTimeLayout
+			} else {
+				if err = p.ParseWith(ctx, ent, p.parseCRIO, write); err != nil {
+					if p.OnError != helper.DropOnErrorQuiet && p.OnError != helper.SendOnErrorQuiet {
+						errs = append(errs, fmt.Errorf("failed to parse crio log: %w", err))
+					}
+					continue
+				}
+				p.timeLayout = crioTimeLayout
+			}
+
+			if err = p.handleTimeAndAttributeMappings(ent); err != nil {
+				errs = append(errs, p.HandleEntryErrorWithWrite(ctx, ent, err, write))
+				continue
+			}
+
+			recombineEntries = append(recombineEntries, ent)
+		default:
+			errs = append(errs, p.HandleEntryErrorWithWrite(ctx, ent, errors.New("failed to detect a valid container log format"), write))
+		}
+	}
+
+	if len(recombineEntries) > 0 {
+		if err := p.recombineParser.ProcessBatch(ctx, recombineEntries); err != nil {
+			errs = append(errs, fmt.Errorf("failed to recombine the crio log: %w", err))
+		}
+	}
+
+	if len(processedEntries) > 0 {
+		errs = append(errs, p.WriteBatch(ctx, processedEntries))
+	}
+
+	return errors.Join(errs...)
 }
 
 // Process will parse an entry of Container logs
@@ -300,11 +396,11 @@ func (p *Parser) extractk8sMetaFromFilePath(e *entry.Entry) error {
 }
 
 func (p *Parser) consumeEntries(ctx context.Context, entries []*entry.Entry) {
-	for _, e := range entries {
-		err := p.Write(ctx, e)
-		if err != nil {
-			p.Logger().Error("failed to write entry", zap.Error(err))
-		}
+	if len(entries) == 0 {
+		return
+	}
+	if err := p.WriteBatch(ctx, entries); err != nil {
+		p.Logger().Error("failed to write entries", zap.Error(err))
 	}
 }
 
