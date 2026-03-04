@@ -10,6 +10,7 @@ $defs:
         type: object
         additionalProperties:
           type: string
+    additionalProperties: false
   web_hook:
     type: object
     properties:
@@ -22,7 +23,8 @@ $defs:
       required_headers:
         type: object
         additionalProperties:
-          $ref: go.opentelemetry.io/collector/config/configopaque.string
+          type: string
+          x-customType: go.opentelemetry.io/collector/config/configopaque.string
       secret:
         type: string
       service_name:

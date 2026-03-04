@@ -5,3 +5,4 @@ properties:
     format: duration
   max_streams:
     type: integer
+additionalProperties: false

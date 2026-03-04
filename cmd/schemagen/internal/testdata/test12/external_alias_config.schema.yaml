@@ -1,0 +1,13 @@
+additionalProperties: false
+properties:
+    mode:
+        type: integer
+        x-customType: os.file_mode
+    params:
+        additionalProperties:
+            items:
+                type: string
+            type: array
+        type: object
+        x-customType: net/url.values
+type: object

@@ -1,6 +1,7 @@
-type: object
+additionalProperties: false
 properties:
-  settings:
-    additionalProperties:
-      type: integer
-    type: object
+    settings:
+        additionalProperties:
+            type: integer
+        type: object
+type: object

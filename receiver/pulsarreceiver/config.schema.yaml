@@ -7,7 +7,8 @@ $defs:
       principal_header:
         type: string
       private_key:
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
       provider_domain:
         type: string
       tenant_domain:
@@ -16,6 +17,7 @@ $defs:
         type: string
       zts_url:
         type: string
+    additionalProperties: false
   authentication:
     type: object
     properties:
@@ -31,6 +33,7 @@ $defs:
       token:
         x-optional: true
         $ref: token
+    additionalProperties: false
   o_auth_2:
     type: object
     properties:
@@ -44,6 +47,7 @@ $defs:
         type: string
       scope:
         type: string
+    additionalProperties: false
   tls:
     type: object
     properties:
@@ -51,11 +55,14 @@ $defs:
         type: string
       key_file:
         type: string
+    additionalProperties: false
   token:
     type: object
     properties:
       token:
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
+    additionalProperties: false
 type: object
 properties:
   auth:
@@ -81,3 +88,4 @@ properties:
   topic:
     description: The topic of pulsar to consume logs,metrics,traces. (default = "otlp_traces" for traces, "otlp_metrics" for metrics, "otlp_logs" for logs)
     type: string
+additionalProperties: false

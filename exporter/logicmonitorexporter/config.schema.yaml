@@ -5,7 +5,9 @@ $defs:
       access_id:
         type: string
       access_key:
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
+    additionalProperties: false
   logs_config:
     description: LogsConfig defines the logs exporter specific configuration options
     type: object
@@ -13,6 +15,7 @@ $defs:
       resource_mapping_op:
         description: Operation to be performed for resource mapping. Valid values are `and`, `or`.
         $ref: mapping_operation
+    additionalProperties: false
   mapping_operation:
     type: string
 description: Config defines configuration for LogicMonitor exporter.
@@ -26,9 +29,10 @@ properties:
     $ref: logs_config
   resource_to_telemetry_conversion:
     $ref: github.com/open-telemetry/opentelemetry-collector-contrib/pkg/resourcetotelemetry.settings
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   sending_queue:
     x-optional: true
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
 allOf:
   - $ref: go.opentelemetry.io/collector/config/confighttp.client_config
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config

@@ -6,6 +6,7 @@ $defs:
         type: boolean
       server_config:
         $ref: go.opentelemetry.io/collector/config/confighttp.server_config
+    additionalProperties: false
   prom_config:
     description: PromConfig is a redeclaration of promconfig.Config because we need custom unmarshaling as prometheus "config" uses `yaml` tags.
     x-customType: github.com/prometheus/prometheus/config.config
@@ -26,3 +27,4 @@ properties:
     $ref: ./internal/targetallocator.config
   trim_metric_suffixes:
     type: boolean
+additionalProperties: false

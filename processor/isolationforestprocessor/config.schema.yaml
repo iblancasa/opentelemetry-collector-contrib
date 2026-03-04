@@ -21,6 +21,7 @@ $defs:
         description: Optional parameters with defaults
         type: number
         x-customType: float64
+    additionalProperties: false
   feature_config:
     type: object
     properties:
@@ -36,6 +37,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   model_config:
     type: object
     properties:
@@ -59,6 +61,7 @@ $defs:
       threshold:
         type: number
         x-customType: float64
+    additionalProperties: false
   performance_config:
     type: object
     properties:
@@ -68,6 +71,7 @@ $defs:
         type: integer
       parallel_workers:
         type: integer
+    additionalProperties: false
 description: Config represents the configuration for the isolation forest processor.
 type: object
 properties:
@@ -105,3 +109,4 @@ properties:
     type: string
   update_frequency:
     type: string
+additionalProperties: false

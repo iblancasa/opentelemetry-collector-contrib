@@ -15,6 +15,7 @@ $defs:
         description: ToAttributes specifies a configuration to extract attributes from span name.
         x-pointer: true
         $ref: to_attributes
+    additionalProperties: false
   status:
     type: object
     properties:
@@ -24,6 +25,7 @@ $defs:
       description:
         description: Description is an optional field documenting Error statuses.
         type: string
+    additionalProperties: false
   to_attributes:
     description: ToAttributes specifies a configuration to extract attributes from span name.
     type: object
@@ -39,6 +41,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
 description: Config is the configuration for the span processor. Prior to any actions being applied, each span is compared against the include properties and then the exclude properties if they are specified. This determines if a span is to be processed or not.
 type: object
 properties:

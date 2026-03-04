@@ -4,6 +4,7 @@ $defs:
     properties:
       datasource:
         type: string
+    additionalProperties: false
 description: Config defines configuration for the Tinybird exporter.
 type: object
 properties:
@@ -20,6 +21,7 @@ properties:
         $ref: signal_config
       sum:
         $ref: signal_config
+    additionalProperties: false
   retry_on_failure:
     $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   sending_queue:
@@ -27,7 +29,8 @@ properties:
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
   token:
     description: Tinybird API token.
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   traces:
     $ref: signal_config
   wait:

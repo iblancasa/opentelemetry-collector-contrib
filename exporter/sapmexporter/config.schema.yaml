@@ -3,7 +3,8 @@ type: object
 properties:
   access_token:
     description: AccessToken is the authentication token provided by SignalFx.
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   compression:
     description: Compression method to use (gzip or zstd). Ignored if DisableCompression=true. If unspecified defaults to gzip.
     type: string
@@ -24,10 +25,11 @@ properties:
     description: NumWorkers is the number of workers that should be used to export traces. Exporter can make as many requests in parallel as the number of workers. Defaults to 8.
     type: integer
     x-customType: uint
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   sending_queue:
     x-optional: true
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
 allOf:
   - $ref: github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk.access_token_passthrough_config
   - $ref: go.opentelemetry.io/collector/exporter/exporterhelper.timeout_config
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config

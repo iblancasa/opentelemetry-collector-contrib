@@ -7,12 +7,14 @@ $defs:
         type: string
       tls:
         $ref: limited_tls_client_setting
+    additionalProperties: false
   limited_tls_client_setting:
     description: LimitedTLSClientSetting is a subset of TLSClientSetting, see LimitedClientConfig for more details
     type: object
     properties:
       insecure_skip_verify:
         type: boolean
+    additionalProperties: false
   rlp_gateway_config:
     type: object
     properties:
@@ -24,7 +26,8 @@ $defs:
     type: object
     properties:
       password:
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
       username:
         type: string
     allOf:
@@ -36,3 +39,4 @@ properties:
     $ref: rlp_gateway_config
   uaa:
     $ref: uaa_config
+additionalProperties: false

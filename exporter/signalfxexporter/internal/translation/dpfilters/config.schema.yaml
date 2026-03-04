@@ -1,4 +1,8 @@
 $defs:
+  filter_set:
+    description: FilterSet is a collection of datapoint filters, any one of which must match for a datapoint to be matched.
+    type: object
+    additionalProperties: false
   metric_filter:
     type: object
     properties:
@@ -15,6 +19,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   property_filter:
     description: 'PropertyFilter is a collection of *StringFilter items used in determining if a given property (name and value) should be included with a dimension update request. The default values for all fields is equivalent to the regex StringFilter `/^.*$/` to match with any potential value. Examples: Don''t send any dimension updates for `k8s.pod.uid` dimension: - dimension_name: "k8s.pod.uid" Don''t send dimension updates for any dimension with a value of `some.value`: - dimension_value: "some.value" Don''t send dimension updates including a `some.property` property for any dimension: - property_name: "some.property" Don''t send dimension updates including a `some.property` property with a "some.value" value for any dimension - property_name: "some.property" property_value: "some.value"'
     type: object
@@ -35,3 +40,8 @@ $defs:
         description: PropertyValue is the (inverted) literal or globbed property value to not include in dimension updates
         x-pointer: true
         $ref: string_filter
+    additionalProperties: false
+  string_filter:
+    description: StringFilter will match if any one of the given strings is a match.
+    type: object
+    additionalProperties: false

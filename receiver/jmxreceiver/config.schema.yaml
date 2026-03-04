@@ -16,7 +16,8 @@ properties:
     type: string
   keystore_password:
     description: 'The keystore password for SSL Supported by: jmx-scraper and jmx-metric-gatherer'
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   keystore_path:
     description: 'The keystore path for SSL Supported by: jmx-scraper and jmx-metric-gatherer'
     type: string
@@ -42,7 +43,8 @@ properties:
       - $ref: go.opentelemetry.io/collector/exporter/exporterhelper.timeout_config
   password:
     description: 'The JMX password Supported by: jmx-scraper and jmx-metric-gatherer'
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   realm:
     description: 'The SASL/DIGEST-MD5 realm Supported by: jmx-scraper and jmx-metric-gatherer'
     type: string
@@ -62,7 +64,8 @@ properties:
     type: string
   truststore_password:
     description: 'The truststore password for SSL Supported by: jmx-scraper and jmx-metric-gatherer'
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   truststore_path:
     description: 'The truststore path for SSL Supported by: jmx-scraper and jmx-metric-gatherer'
     type: string

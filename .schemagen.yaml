@@ -40,3 +40,7 @@ componentOverrides:
     configName: 'WindowsLogConfig'
   connector/signaltometrics:
     configName: 'config.Config'
+    configDir: 'config'
+  exporter/datadog:
+    configName: 'config.Config'
+    configDir: '../../pkg/datadog/config'

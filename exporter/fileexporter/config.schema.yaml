@@ -11,6 +11,7 @@ $defs:
       resource_attribute:
         description: ResourceAttribute specifies the name of the resource attribute that contains the path segment of the file to write to. The final path will be the Path config value, with the * replaced with the value of this resource attribute. Default is "fileexporter.path_segment".
         type: string
+    additionalProperties: false
   rotation:
     description: Rotation an option to rolling log files
     type: object
@@ -27,6 +28,7 @@ $defs:
       max_megabytes:
         description: MaxMegabytes is the maximum size in megabytes of the file before it gets rotated. It defaults to 100 megabytes.
         type: integer
+    additionalProperties: false
 description: Config defines configuration for file exporter.
 type: object
 properties:
@@ -65,3 +67,4 @@ properties:
     description: Rotation defines an option about rotation of telemetry files.
     x-pointer: true
     $ref: rotation
+additionalProperties: false

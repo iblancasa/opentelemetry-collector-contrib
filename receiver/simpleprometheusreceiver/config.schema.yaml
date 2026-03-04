@@ -18,7 +18,12 @@ properties:
     type: string
   params:
     description: Params the parameters to the metrics endpoint.
+    type: object
     x-customType: net/url.values
+    additionalProperties:
+      type: array
+      items:
+        type: string
   tls_config:
     type: object
     properties:
@@ -34,6 +39,7 @@ properties:
       key_file:
         description: Path to the client TLS key to use for TLS required connections.
         type: string
+    additionalProperties: false
   tls_enabled:
     description: Whether not TLS is enabled
     type: boolean

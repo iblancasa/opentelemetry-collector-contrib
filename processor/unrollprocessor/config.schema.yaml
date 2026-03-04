@@ -3,3 +3,4 @@ type: object
 properties:
   recursive:
     type: boolean
+additionalProperties: false

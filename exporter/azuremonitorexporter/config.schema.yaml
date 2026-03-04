@@ -2,13 +2,15 @@ description: Config defines configuration for Azure Monitor
 type: object
 properties:
   connection_string:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   custom_events_enabled:
     type: boolean
   exception_events_enabled:
     type: boolean
   instrumentation_key:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   maxbatchinterval:
     type: string
     format: duration

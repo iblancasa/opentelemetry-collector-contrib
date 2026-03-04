@@ -1,0 +1,9 @@
+type: object
+properties:
+  logs:
+    x-customType: ./internal/unmarshaler/logs.logs_config
+  metrics:
+    x-customType: ./internal/unmarshaler/metrics.metrics_config
+  traces:
+    x-customType: ./internal/unmarshaler/traces.traces_config
+additionalProperties: false

@@ -7,6 +7,7 @@ $defs:
         type: array
         items:
           $ref: and_sub_policy_cfg
+    additionalProperties: false
   and_sub_policy_cfg:
     description: AndSubPolicyCfg holds the common configuration to all policies under and policy.
     type: object
@@ -57,6 +58,7 @@ $defs:
       type:
         description: Type of the policy this will be used to match the proper configuration of the policy.
         $ref: policy_type
+    additionalProperties: false
   boolean_attribute_cfg:
     description: BooleanAttributeCfg holds the configurable settings to create a boolean attribute filter sampling policy evaluator.
     type: object
@@ -70,6 +72,7 @@ $defs:
       value:
         description: Value indicate the bool value, either true or false to use when matching against attribute values. BooleanAttribute Policy will apply exact value match on Value
         type: boolean
+    additionalProperties: false
   bytes_limiting_cfg:
     description: BytesLimitingCfg holds the configurable settings to create a bytes limiting sampling policy evaluator using a token bucket algorithm.
     type: object
@@ -82,6 +85,7 @@ $defs:
         description: BytesPerSecond sets the limit on the maximum number of bytes that can be processed each second.
         type: integer
         x-customType: int64
+    additionalProperties: false
   composite_cfg:
     description: CompositeCfg holds the configurable settings to create a composite sampling policy evaluator.
     type: object
@@ -101,6 +105,7 @@ $defs:
         type: array
         items:
           $ref: rate_allocation_cfg
+    additionalProperties: false
   composite_sub_policy_cfg:
     description: CompositeSubPolicyCfg holds the common configuration to all policies under composite policy.
     type: object
@@ -154,6 +159,7 @@ $defs:
       type:
         description: Type of the policy this will be used to match the proper configuration of the policy.
         $ref: policy_type
+    additionalProperties: false
   decision_cache_config:
     type: object
     properties:
@@ -163,6 +169,7 @@ $defs:
       sampled_cache_size:
         description: SampledCacheSize specifies the size of the cache that holds the sampled trace IDs. This value will be the maximum amount of trace IDs that the cache can hold before overwriting previous IDs. For effective use, this value should be at least an order of magnitude greater than Config.NumTraces. If left as default 0, a no-op DecisionCache will be used.
         type: integer
+    additionalProperties: false
   drop_cfg:
     description: DropCfg holds the common configuration to all policies under drop policy.
     type: object
@@ -171,6 +178,7 @@ $defs:
         type: array
         items:
           $ref: and_sub_policy_cfg
+    additionalProperties: false
   latency_cfg:
     description: LatencyCfg holds the configurable settings to create a latency filter sampling policy evaluator
     type: object
@@ -183,12 +191,14 @@ $defs:
         description: Upper bound in milliseconds.
         type: integer
         x-customType: int64
+    additionalProperties: false
   not_cfg:
     description: NotCfg holds the configuration for the not policy.
     type: object
     properties:
       not_sub_policy:
         $ref: not_sub_policy_cfg
+    additionalProperties: false
   not_sub_policy_cfg:
     description: NotSubPolicyCfg holds the common configuration to the policy under the not policy.
     type: object
@@ -239,6 +249,7 @@ $defs:
       type:
         description: Type of the policy this will be used to match the proper configuration of the policy.
         $ref: policy_type
+    additionalProperties: false
   numeric_attribute_cfg:
     description: NumericAttributeCfg holds the configurable settings to create a numeric attribute filter sampling policy evaluator.
     type: object
@@ -257,12 +268,14 @@ $defs:
         description: MinValue is the minimum value of the attribute to be considered a match.
         type: integer
         x-customType: int64
+    additionalProperties: false
   ottl_condition_cfg:
     description: OTTLConditionCfg holds the configurable setting to create a OTTL condition filter sampling policy evaluator.
     type: object
     properties:
       error_mode:
-        $ref: github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl.error_mode
+        type: string
+        x-customType: github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl.error_mode
       span:
         type: array
         items:
@@ -271,6 +284,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   policy_cfg:
     description: PolicyCfg holds the common configuration to all policies.
     type: object
@@ -333,6 +347,7 @@ $defs:
       type:
         description: Type of the policy this will be used to match the proper configuration of the policy.
         $ref: policy_type
+    additionalProperties: false
   policy_type:
     description: PolicyType indicates the type of sampling policy.
     type: string
@@ -347,6 +362,7 @@ $defs:
         description: 'SamplingPercentage is the percentage rate at which traces are going to be sampled. Defaults to zero, i.e.: no sample. Values greater or equal 100 are treated as "sample all traces".'
         type: number
         x-customType: float64
+    additionalProperties: false
   rate_allocation_cfg:
     description: RateAllocationCfg used within composite policy
     type: object
@@ -356,6 +372,7 @@ $defs:
         x-customType: int64
       policy:
         type: string
+    additionalProperties: false
   rate_limiting_cfg:
     description: RateLimitingCfg holds the configurable settings to create a rate limiting sampling policy evaluator.
     type: object
@@ -364,6 +381,7 @@ $defs:
         description: SpansPerSecond sets the limit on the maximum number of spans that can be processed each second.
         type: integer
         x-customType: int64
+    additionalProperties: false
   span_count_cfg:
     description: SpanCountCfg holds the configurable settings to create a Span Count filter sampling policy evaluator
     type: object
@@ -375,6 +393,7 @@ $defs:
         description: Minimum number of spans in a Trace
         type: integer
         x-customType: int32
+    additionalProperties: false
   status_code_cfg:
     description: StatusCodeCfg holds the configurable settings to create a status code filter sampling policy evaluator.
     type: object
@@ -383,6 +402,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   string_attribute_cfg:
     description: StringAttributeCfg holds the configurable settings to create a string attribute filter sampling policy evaluator.
     type: object
@@ -404,6 +424,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   trace_state_cfg:
     description: TraceStateCfg holds the common configuration for trace states.
     type: object
@@ -416,6 +437,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
 description: Config holds the configuration for tail-based sampling.
 type: object
 properties:
@@ -456,3 +478,4 @@ properties:
   sample_on_first_match:
     description: Make decision as soon as a policy matches
     type: boolean
+additionalProperties: false

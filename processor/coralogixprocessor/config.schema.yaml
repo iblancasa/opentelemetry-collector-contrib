@@ -5,6 +5,9 @@ $defs:
     properties:
       enabled:
         type: boolean
+    additionalProperties: false
 type: object
-allOf:
-  - $ref: transactions_config
+properties:
+  transactions:
+    $ref: transactions_config
+additionalProperties: false

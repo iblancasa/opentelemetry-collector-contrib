@@ -12,6 +12,7 @@ $defs:
       sasl_xauth2:
         x-optional: true
         $ref: sasl_x_auth_2_config
+    additionalProperties: false
   flow_control:
     description: FlowControl defines the configuration for what to do in backpressure scenarios, e.g. memorylimiter errors
     type: object
@@ -19,6 +20,7 @@ $defs:
       delayed_retry:
         x-optional: true
         $ref: flow_control_delayed_retry
+    additionalProperties: false
   flow_control_delayed_retry:
     description: FlowControlDelayedRetry represents the strategy of waiting for a defined amount of time (in time.Duration) and attempt redelivery
     type: object
@@ -26,14 +28,21 @@ $defs:
       delay:
         type: string
         format: duration
+    additionalProperties: false
+  sasl_external_config:
+    description: SaslExternalConfig defines the configuration for the SASL External used in conjunction with TLS client authentication.
+    type: object
+    additionalProperties: false
   sasl_plain_text_config:
     description: SaslPlainTextConfig defines SASL PLAIN authentication.
     type: object
     properties:
       password:
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
       username:
         type: string
+    additionalProperties: false
   sasl_x_auth_2_config:
     description: SaslXAuth2Config defines the configuration for the SASL XAUTH2 authentication.
     type: object
@@ -42,6 +51,7 @@ $defs:
         type: string
       username:
         type: string
+    additionalProperties: false
 description: Config defines configuration for Solace receiver.
 type: object
 properties:
@@ -63,3 +73,4 @@ properties:
     type: string
   tls:
     $ref: go.opentelemetry.io/collector/config/configtls.client_config
+additionalProperties: false

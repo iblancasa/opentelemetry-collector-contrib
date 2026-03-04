@@ -1,0 +1,17 @@
+type: object
+properties:
+  audience:
+    type: array
+    items:
+      type: string
+  issuer:
+    type: string
+  key_id:
+    type: string
+  private_key:
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
+  ttl:
+    type: string
+    format: duration
+additionalProperties: false

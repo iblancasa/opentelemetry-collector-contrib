@@ -9,6 +9,9 @@ $defs:
         type: boolean
     allOf:
       - $ref: metric_rep
+  gauge_metric:
+    type: object
+    additionalProperties: false
   metric_config:
     description: MetricsConfig defines the configuration for a metric to be created.
     type: object
@@ -21,6 +24,7 @@ $defs:
         $ref: sum_metric
       unit:
         type: string
+    additionalProperties: false
   metric_rep:
     type: object
     properties:
@@ -30,6 +34,7 @@ $defs:
           type: string
       metric:
         type: string
+    additionalProperties: false
   object_config:
     description: ObjectConfig defines configuration for a perf counter object.
     type: object
@@ -44,6 +49,7 @@ $defs:
           type: string
       object:
         type: string
+    additionalProperties: false
   sum_metric:
     type: object
     properties:
@@ -51,6 +57,7 @@ $defs:
         type: string
       monotonic:
         type: boolean
+    additionalProperties: false
 description: Config defines configuration for WindowsPerfCounters receiver.
 type: object
 properties:

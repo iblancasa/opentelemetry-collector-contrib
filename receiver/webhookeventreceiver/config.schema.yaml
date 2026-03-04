@@ -6,6 +6,7 @@ $defs:
         type: string
       value:
         type: string
+    additionalProperties: false
 description: Config defines configuration for the Generic Webhook receiver.
 type: object
 properties:

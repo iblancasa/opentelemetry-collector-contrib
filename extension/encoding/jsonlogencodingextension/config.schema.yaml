@@ -1,0 +1,11 @@
+$defs:
+  json_encoding_mode:
+    type: string
+type: object
+properties:
+  array_mode:
+    type: boolean
+  mode:
+    description: Export raw log string instead of log wrapper
+    $ref: json_encoding_mode
+additionalProperties: false

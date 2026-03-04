@@ -1,0 +1,30 @@
+$defs:
+  context_conditions:
+    description: ContextConditions is a wrapper struct for OTTL conditions.
+    type: object
+    properties:
+      conditions:
+        type: array
+        items:
+          type: string
+      context:
+        $ref: context_id
+      error_mode:
+        description: ErrorMode determines how the processor reacts to errors that occur while processing this group of conditions. When provided, it overrides the default Config ErrorMode.
+        type: string
+        x-customType: github.com/open-telemetry/opentelemetry-collector-contrib/pkg/ottl.error_mode
+    additionalProperties: false
+  context_id:
+    type: string
+  logs_consumer:
+    type: object
+    additionalProperties: false
+  metrics_consumer:
+    type: object
+    additionalProperties: false
+  profiles_consumer:
+    type: object
+    additionalProperties: false
+  traces_consumer:
+    type: object
+    additionalProperties: false

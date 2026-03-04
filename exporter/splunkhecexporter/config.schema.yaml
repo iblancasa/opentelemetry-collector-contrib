@@ -15,6 +15,7 @@ $defs:
         x-customType: int64
       sizer:
         $ref: go.opentelemetry.io/collector/exporter/exporterhelper.request_sizer_type
+    additionalProperties: false
   hec_heartbeat:
     description: HecHeartbeat defines the heartbeat information for the exporter
     type: object
@@ -26,6 +27,7 @@ $defs:
       startup:
         description: Startup is used to send heartbeat events on exporter's startup.
         type: boolean
+    additionalProperties: false
   hec_telemetry:
     description: HecTelemetry defines the telemetry configuration for the exporter
     type: object
@@ -43,6 +45,7 @@ $defs:
         type: object
         additionalProperties:
           type: string
+    additionalProperties: false
 description: Config defines configuration for Splunk exporter.
 type: object
 properties:
@@ -95,6 +98,8 @@ properties:
   profiling_data_enabled:
     description: ProfilingDataEnabled can be used to disable sending profiling data by the exporter.
     type: boolean
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   sending_queue:
     x-optional: true
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
@@ -115,10 +120,10 @@ properties:
     $ref: hec_telemetry
   token:
     description: 'HEC Token is the authentication token provided by Splunk: https://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector.'
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   use_multi_metric_format:
     description: UseMultiMetricFormat combines metric events to save space during ingestion.
     type: boolean
 allOf:
   - $ref: go.opentelemetry.io/collector/config/confighttp.client_config
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config

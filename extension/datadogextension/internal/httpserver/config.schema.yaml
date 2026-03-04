@@ -1,0 +1,13 @@
+$defs:
+  config:
+    description: Config contains the information necessary for configuring the local metadata HTTP server.
+    type: object
+    properties:
+      path:
+        type: string
+    allOf:
+      - $ref: go.opentelemetry.io/collector/config/confighttp.server_config
+  server:
+    description: Server provides local metadata server functionality (display the otel_collector payload locally) as well as functions to serialize and export this metadata to Datadog backend.
+    type: object
+    additionalProperties: false

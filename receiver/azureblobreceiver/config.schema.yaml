@@ -9,12 +9,14 @@ $defs:
       endpoint:
         description: Azure Event Hub endpoint triggering on the `Blob Create` event
         type: string
+    additionalProperties: false
   logs_config:
     type: object
     properties:
       container_name:
         description: Name of the blob container with the logs (default = "logs")
         type: string
+    additionalProperties: false
   service_principal_config:
     type: object
     properties:
@@ -23,16 +25,19 @@ $defs:
         type: string
       client_secret:
         description: Client secret, used with Service Principal authentication
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
       tenant_id:
         description: Tenant ID, used with Service Principal authentication
         type: string
+    additionalProperties: false
   traces_config:
     type: object
     properties:
       container_name:
         description: Name of the blob container with the traces (default = "traces")
         type: string
+    additionalProperties: false
 type: object
 properties:
   auth:
@@ -59,3 +64,4 @@ properties:
   traces:
     description: Traces related configurations
     $ref: traces_config
+additionalProperties: false

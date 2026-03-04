@@ -4,3 +4,4 @@ properties:
   endpoint:
     description: The address to listen on for incoming Fluent Forward events.  Should be of the form `<ip addr>:<port>` (TCP) or `unix://<socket_path>` (Unix domain socket).
     type: string
+additionalProperties: false

@@ -17,6 +17,7 @@ $defs:
       poll_interval:
         type: string
         format: duration
+    additionalProperties: false
   alert_config:
     type: object
     properties:
@@ -42,10 +43,12 @@ $defs:
           x-pointer: true
           $ref: project_config
       secret:
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
       tls:
         x-pointer: true
         $ref: go.opentelemetry.io/collector/config/configtls.server_config
+    additionalProperties: false
   events_config:
     description: EventsConfig is the configuration options for events collection
     type: object
@@ -73,6 +76,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   log_config:
     type: object
     properties:
@@ -83,6 +87,7 @@ $defs:
         items:
           x-pointer: true
           $ref: logs_project_config
+    additionalProperties: false
   logs_project_config:
     type: object
     properties:
@@ -101,6 +106,7 @@ $defs:
     properties:
       id:
         type: string
+    additionalProperties: false
   project_config:
     type: object
     properties:
@@ -114,6 +120,7 @@ $defs:
           type: string
       name:
         type: string
+    additionalProperties: false
 type: object
 properties:
   alerts:
@@ -128,7 +135,8 @@ properties:
   logs:
     $ref: log_config
   private_key:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   projects:
     type: array
     items:

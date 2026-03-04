@@ -26,6 +26,7 @@ type (
 	ComponentOverrides map[string]ComponentOverride
 	ComponentOverride  struct {
 		ConfigName string `yaml:"configName"`
+		ConfigDir  string `yaml:"configDir"`
 	}
 	TypeDesc struct {
 		SchemaType     SchemaType `yaml:"schemaType"`

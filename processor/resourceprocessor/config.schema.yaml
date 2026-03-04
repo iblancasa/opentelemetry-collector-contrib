@@ -6,3 +6,4 @@ properties:
     type: array
     items:
       $ref: github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/attraction.action_key_value
+additionalProperties: false

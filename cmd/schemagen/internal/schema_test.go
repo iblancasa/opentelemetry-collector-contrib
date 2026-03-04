@@ -60,6 +60,7 @@ func TestSchemaWithComplexFields(t *testing.T) {
 			"address": {
 				"description": "Address object",
 				"type": "object",
+				"additionalProperties": false,
 				"properties": {
 					"street": {
 						"description": "The street address.",

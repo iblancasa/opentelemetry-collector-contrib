@@ -11,6 +11,7 @@ $defs:
         type: string
       port:
         type: integer
+    additionalProperties: false
 description: Config defines configuration for Cisco OS receiver.
 type: object
 properties:

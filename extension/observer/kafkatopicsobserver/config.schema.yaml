@@ -1,0 +1,10 @@
+description: Config defines configuration for docker observer
+type: object
+properties:
+  topic_regex:
+    type: string
+  topics_sync_interval:
+    type: string
+    format: duration
+allOf:
+  - $ref: github.com/open-telemetry/opentelemetry-collector-contrib/pkg/kafka/configkafka.client_config

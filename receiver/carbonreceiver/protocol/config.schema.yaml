@@ -9,6 +9,15 @@ $defs:
       type:
         description: Type of the parser to be used with the arriving data.
         type: string
+    additionalProperties: false
+  parser:
+    x-customType: Parser
+  parser_config:
+    x-customType: ParserConfig
+  plaintext_config:
+    description: PlaintextConfig holds the configuration for the plaintext parser.
+    type: object
+    additionalProperties: false
   regex_parser_config:
     description: 'RegexParserConfig has the configuration for a parser that can breakdown a Carbon "metric path" and transform it in corresponding metric labels according to a series of regular expressions rules (see below for details). This is typically used to extract labels from a "naming hierarchy", see https://graphite.readthedocs.io/en/latest/feeding-carbon.html#step-1-plan-a-naming-hierarchy Examples: 1. Rule: - regexp: "(?P<key_svc>[^.]+)\.(?P<key_host>[^.]+)\.cpu\.seconds" name_prefix: cpu_seconds labels: k: v Metric path: "service_name.host00.cpu.seconds" Resulting metric: name: cpu_seconds label keys: {"svc", "host", "k"} label values: {"service_name", "host00", "k"} 2. Rule: - regexp: "^(?P<key_svc>[^.]+)\.(?P<key_host>[^.]+)\.(?P<name_0>[^.]+).(?P<name_1>[^.]+)$" Metric path: "svc_02.host02.avg.duration" Resulting metric: name: avgduration label keys: {"svc", "host"} label values: {"svc_02", "host02"}'
     type: object
@@ -22,6 +31,7 @@ $defs:
         items:
           x-pointer: true
           $ref: regex_rule
+    additionalProperties: false
   regex_rule:
     description: RegexRule describes how parts of the name of metric are going to be mapped to metric labels. The rule is only applied if the name matches the given regular expression.
     type: object
@@ -40,5 +50,6 @@ $defs:
       type:
         description: MetricType selects the type of metric to be generated, supported values are "gauge" (the default) and "cumulative".
         type: string
+    additionalProperties: false
   target_metric_type:
     type: string

@@ -11,12 +11,14 @@ $defs:
       insecure:
         type: boolean
       password:
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
       redfish:
         type: object
         properties:
           version:
             type: string
+        additionalProperties: false
       resources:
         type: array
         items:
@@ -25,6 +27,7 @@ $defs:
         type: string
       username:
         type: string
+    additionalProperties: false
 type: object
 properties:
   servers:

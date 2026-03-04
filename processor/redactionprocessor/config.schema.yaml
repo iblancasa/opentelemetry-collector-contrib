@@ -34,7 +34,8 @@ properties:
     $ref: hash_function
   hmac_key:
     description: 'HMACKey is the secret key used for HMAC hashing when HashFunction is set to hmac-sha256 or hmac-sha512. This should be loaded from a secure source like environment variables. Minimum length: 32 bytes for HMAC-SHA256, 64 bytes for HMAC-SHA512.'
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   ignored_key_patterns:
     description: IgnoredKeyPatterns is a list of attribute key patterns (regex) that are not redacted. attributes matching any of these patterns are allowed to pass through the filter without their values being checked or modified.
     type: array
@@ -54,3 +55,4 @@ properties:
   url_sanitizer:
     description: URLSanitization is a flag to sanitize URLs by removing UUIDs, timestamps, and other non-essential information
     $ref: ./internal/url.url_sanitization_config
+additionalProperties: false

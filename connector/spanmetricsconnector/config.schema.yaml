@@ -8,6 +8,7 @@ $defs:
         type: string
       name:
         type: string
+    additionalProperties: false
   events_config:
     type: object
     properties:
@@ -19,6 +20,7 @@ $defs:
       enabled:
         description: Enabled is a flag to enable events.
         type: boolean
+    additionalProperties: false
   exemplars_config:
     type: object
     properties:
@@ -26,6 +28,7 @@ $defs:
         type: boolean
       max_per_data_point:
         type: integer
+    additionalProperties: false
   explicit_histogram_config:
     type: object
     properties:
@@ -35,12 +38,14 @@ $defs:
         items:
           type: string
           format: duration
+    additionalProperties: false
   exponential_histogram_config:
     type: object
     properties:
       max_size:
         type: integer
         x-customType: int32
+    additionalProperties: false
   histogram_config:
     type: object
     properties:
@@ -57,7 +62,9 @@ $defs:
         x-optional: true
         $ref: exponential_histogram_config
       unit:
-        $ref: ./internal/metrics.unit
+        type: integer
+        x-customType: ./internal/metrics.unit
+    additionalProperties: false
 description: Config defines the configuration options for spanmetricsconnector.
 type: object
 properties:
@@ -119,3 +126,4 @@ properties:
     type: array
     items:
       type: string
+additionalProperties: false

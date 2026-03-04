@@ -9,7 +9,7 @@ properties:
     items:
       type: array
       items:
-        $ref: go.opentelemetry.io/collector/pipeline.id
+        x-customType: go.opentelemetry.io/collector/pipeline.id
   retry_gap:
     description: RetryGap is how much time will pass between trying two separate priority levels in a single RetryInterval If the priority list has 3 levels, the RetryInterval is 5m, and the retryGap is 1m, within the 5m RetryInterval, the connector will only try one level every 1m, and will return to the stable level in the interim
     type: string
@@ -22,3 +22,4 @@ properties:
     description: QueueSettings use the exporterhelper sending_queue to move the queue to the connector to avoid data being stuck in the queue of an unhealthy exporter
     x-optional: true
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
+additionalProperties: false

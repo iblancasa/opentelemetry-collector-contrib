@@ -4,3 +4,4 @@ properties:
     type: boolean
   include_scope_info:
     type: boolean
+additionalProperties: false

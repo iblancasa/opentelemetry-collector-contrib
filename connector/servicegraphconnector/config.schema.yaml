@@ -9,6 +9,7 @@ $defs:
         description: TTL is the time to live for items in the store.
         type: string
         format: duration
+    additionalProperties: false
 description: Config defines the configuration options for servicegraphprocessor.
 type: object
 properties:
@@ -60,3 +61,4 @@ properties:
     type: array
     items:
       type: string
+additionalProperties: false

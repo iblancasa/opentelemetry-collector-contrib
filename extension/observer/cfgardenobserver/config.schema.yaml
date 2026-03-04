@@ -1,0 +1,61 @@
+$defs:
+  cf_auth:
+    type: object
+    properties:
+      access_token:
+        description: Used for token authentication method
+        type: string
+      client_id:
+        description: Used for client_credentials authentication method
+        type: string
+      client_secret:
+        type: string
+      password:
+        type: string
+      refresh_token:
+        type: string
+      type:
+        description: Authentication method, there are 3 options
+        type: string
+      username:
+        description: Used for user_pass authentication method
+        type: string
+    additionalProperties: false
+  cf_config:
+    type: object
+    properties:
+      auth:
+        description: Authentication details
+        $ref: cf_auth
+      endpoint:
+        description: The URL of the CloudFoundry API
+        type: string
+    additionalProperties: false
+  garden_config:
+    type: object
+    properties:
+      endpoint:
+        description: The URL of the CF Garden api. Default is "/var/vcap/data/garden/garden.sock"
+        type: string
+    additionalProperties: false
+description: Config defines configuration for CF Garden observer.
+type: object
+properties:
+  cache_sync_interval:
+    description: 'The time to wait before resyncing app information on cached containers using the CloudFoundry API. Default: "5m"'
+    type: string
+    format: duration
+  cloud_foundry:
+    description: CloudFoundry API Configuration
+    $ref: cf_config
+  garden:
+    description: Garden API Configuration
+    $ref: garden_config
+  include_app_labels:
+    description: 'Determines whether or not Application labels get added to the Endpoint labels. This requires cloud_foundry to be configured, such that API calls can be made Default: false'
+    type: boolean
+  refresh_interval:
+    description: 'RefreshInterval determines the frequency at which the observer needs to poll for collecting information about new processes. Default: "1m"'
+    type: string
+    format: duration
+additionalProperties: false

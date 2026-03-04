@@ -11,10 +11,12 @@ $defs:
         type: boolean
       password:
         description: Password is used to optionally specify the basic auth password
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
       username:
         description: Username is used to optionally specify the basic auth username
         type: string
+    additionalProperties: false
 description: Config defines configuration for the InfluxDB exporter.
 type: object
 properties:
@@ -41,6 +43,8 @@ properties:
   precision:
     description: Precision is the timestamp precision for writing data to InfluxDB.
     type: string
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   sending_queue:
     x-optional: true
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
@@ -51,10 +55,10 @@ properties:
       type: string
   token:
     description: Token is used to identify InfluxDB permissions within the organization.
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   v1_compatibility:
     description: V1Compatibility is used to specify if the exporter should use the v1.X InfluxDB API schema.
     $ref: v_1_compatibility
 allOf:
   - $ref: go.opentelemetry.io/collector/config/confighttp.client_config
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config

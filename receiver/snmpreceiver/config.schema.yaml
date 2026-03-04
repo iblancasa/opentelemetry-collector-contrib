@@ -9,6 +9,7 @@ $defs:
       value:
         description: Value is optional and is only needed for a matched AttributeConfig's with enum value. Value should match one of the AttributeConfig's enum values in this case
         type: string
+    additionalProperties: false
   attribute_config:
     description: AttributeConfig contains config info about all of the metric attributes that will be used by this receiver.
     type: object
@@ -30,6 +31,7 @@ $defs:
       value:
         description: Value is optional, and will allow for a different attribute key other than the attribute name
         type: string
+    additionalProperties: false
   column_oid:
     description: ColumnOID holds OID info for an indexed metric as well as any attributes or resource attributes that are attached to it
     type: object
@@ -47,6 +49,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   gauge_metric:
     description: GaugeMetric contains info about the value of the gauge metric
     type: object
@@ -54,6 +57,7 @@ $defs:
       value_type:
         description: ValueType is required and can be either int or double
         type: string
+    additionalProperties: false
   metric_config:
     description: MetricConfig contains config info about a given metric
     type: object
@@ -80,6 +84,7 @@ $defs:
       unit:
         description: Unit is required
         type: string
+    additionalProperties: false
   resource_attribute_config:
     description: ResourceAttributeConfig contains config info about all of the resource attributes that will be used by this receiver.
     type: object
@@ -96,6 +101,7 @@ $defs:
       scalar_oid:
         description: ScalarOID is required only if OID or IndexedValuePrefix is not set. This is the scalar OID which will provide a value to be used for this resource attribute. Single or indexed metrics can then be associated with the resource. (Indexed metrics also need an indexed attribute or resource attribute to associate with a scalar metric resource attribute)
         type: string
+    additionalProperties: false
   scalar_oid:
     description: ScalarOID holds OID info for a scalar metric as well as any {resource} attributes that are attached to it
     type: object
@@ -113,6 +119,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   sum_metric:
     description: SumMetric contains info about the value of the sum metric
     type: object
@@ -126,6 +133,7 @@ $defs:
       value_type:
         description: ValueType is required and can be either int or double
         type: string
+    additionalProperties: false
 description: Config defines the configuration for the various elements of the receiver.
 type: object
 properties:
@@ -137,7 +145,8 @@ properties:
       $ref: attribute_config
   auth_password:
     description: AuthPassword is the authentication password used for this SNMP connection. Only valid for version "v3" and if "no_auth_no_priv" is not selected for SecurityLevel
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   auth_type:
     description: 'AuthType is the type of authentication protocol to use for this SNMP connection. Only valid for version “v3” and if “no_auth_no_priv” is not selected for SecurityLevel Valid options: “md5”, “sha”, “sha224”, “sha256”, “sha384”, “sha512” Default: "md5"'
     type: string
@@ -155,7 +164,8 @@ properties:
       $ref: metric_config
   privacy_password:
     description: PrivacyPassword is the authentication password used for this SNMP connection. Only valid for version “v3” and if "auth_priv" is selected for SecurityLevel
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   privacy_type:
     description: 'PrivacyType is the type of privacy protocol to use for this SNMP connection. Only valid for version “v3” and if "auth_priv" is selected for SecurityLevel Valid options: “des”, “aes”, “aes192”, “aes256”, “aes192c”, “aes256c” Default: "des"'
     type: string

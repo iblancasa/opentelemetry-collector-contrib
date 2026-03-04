@@ -13,7 +13,8 @@ properties:
       type: string
   password:
     description: Password is the password used when making REST calls to elasticsearch. Must be specified if Username is. Not required.
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   skip_cluster_metrics:
     description: SkipClusterMetrics indicates whether cluster level metrics from /_cluster/* endpoints should be scraped or not.
     type: boolean

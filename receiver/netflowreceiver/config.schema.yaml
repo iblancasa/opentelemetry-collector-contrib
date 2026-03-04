@@ -22,3 +22,4 @@ properties:
   workers:
     description: The number of workers that the listener will use to decode incoming flow messages By default it will be two times the number of sockets Ideally set this to the number of CPU cores
     type: integer
+additionalProperties: false

@@ -8,6 +8,7 @@ $defs:
         type: string
       name:
         type: string
+    additionalProperties: false
 description: Config defines the configuration options for exceptionsconnector
 type: object
 properties:
@@ -25,3 +26,4 @@ properties:
     description: Threshold of slow sql. default 500ms.
     type: string
     format: duration
+additionalProperties: false

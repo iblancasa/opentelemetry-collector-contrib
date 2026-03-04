@@ -11,12 +11,14 @@ $defs:
       usage:
         type: string
         format: duration
+    additionalProperties: false
   settings:
     type: object
     properties:
       reload_intervals:
         x-pointer: true
         $ref: reload_intervals
+    additionalProperties: false
 description: Config relating to Array Metric Scraper.
 type: object
 properties:

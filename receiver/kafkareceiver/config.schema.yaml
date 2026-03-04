@@ -8,6 +8,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   message_marking:
     type: object
     properties:
@@ -20,12 +21,14 @@ $defs:
       on_permanent_error:
         description: 'If false, only the successfully processed messages are marked. This only applies to permanent errors. It has no impact if After is set to false. Default value inherits from OnError for backward compatibility. Note: this can block the entire partition in case a message processing returns a permanent error.'
         type: boolean
+    additionalProperties: false
   metric_config:
     description: MetricConfig provides common config for a particular metric.
     type: object
     properties:
       enabled:
         type: boolean
+    additionalProperties: false
   metrics_config:
     description: MetricsConfig provides config for optional receiver metrics.
     type: object
@@ -33,11 +36,13 @@ $defs:
       kafka_receiver_records_delay:
         description: KafkaReceiverRecordsDelay controls whether the metric kafka_receiver_records_delay that measures the time in seconds between producing and receiving a batch of records will be reported or not. This metric is not reported by default because it may slow down high-volume consuming.
         $ref: metric_config
+    additionalProperties: false
   telemetry_config:
     type: object
     properties:
       metrics:
         $ref: metrics_config
+    additionalProperties: false
   topic_encoding_config:
     description: TopicEncodingConfig holds signal-specific topic and encoding configuration.
     type: object
@@ -55,6 +60,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
 description: Config defines configuration for Kafka receiver.
 type: object
 properties:

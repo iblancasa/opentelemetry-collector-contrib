@@ -1,7 +1,7 @@
-type: object
+additionalProperties: false
 properties:
-  tags:
-    items:
-      type: string
-    type: array
-
+    tags:
+        items:
+            type: string
+        type: array
+type: object

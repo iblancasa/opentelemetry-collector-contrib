@@ -2,7 +2,8 @@ description: Config represent a configuration for the CloudWatch logs exporter.
 type: object
 properties:
   access_key:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   filter:
     description: Data aggregation method. The supported values ​​are max, min, average, sum, variance.
     type: string
@@ -39,7 +40,8 @@ properties:
   retry_on_failure:
     $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   secret_key:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   skip_cluster_metrics:
     description: SkipClusterMetrics indicates whether cluster level metrics from /_cluster/* endpoints should be scraped or not.
     type: boolean

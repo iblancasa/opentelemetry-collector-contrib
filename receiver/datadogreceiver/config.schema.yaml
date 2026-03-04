@@ -9,6 +9,7 @@ $defs:
       proxy:
         description: Proxy controls how the `/intake` proxy operates
         $ref: proxy_config
+    additionalProperties: false
   proxy_config:
     description: ProxyConfig controls how the `/intake` proxy operates
     type: object
@@ -16,6 +17,7 @@ $defs:
       api:
         description: API defines the settings for calling Datadog with the proxied requests
         $ref: github.com/open-telemetry/opentelemetry-collector-contrib/pkg/datadog/config.api_config
+    additionalProperties: false
 type: object
 properties:
   intake:

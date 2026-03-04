@@ -14,6 +14,7 @@ properties:
     type: boolean
   socket_permissions:
     description: Will only be used when transport set to 'unixgram'.
+    type: integer
     x-customType: os.file_mode
   timer_histogram_mapping:
     type: array

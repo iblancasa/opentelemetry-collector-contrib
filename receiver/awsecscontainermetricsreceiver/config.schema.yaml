@@ -5,3 +5,4 @@ properties:
     description: CollectionInterval is the interval at which metrics should be collected
     type: string
     format: duration
+additionalProperties: false

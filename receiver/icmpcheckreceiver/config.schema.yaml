@@ -12,6 +12,7 @@ $defs:
       ping_timeout:
         type: string
         format: duration
+    additionalProperties: false
 type: object
 properties:
   targets:

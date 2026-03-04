@@ -11,11 +11,14 @@ $defs:
       path:
         description: Path for Ack API, default is '/services/collector/ack'. Ignored if Extension is not provided.
         type: string
+    additionalProperties: false
   splitting_strategy:
     type: string
 description: Config defines configuration for the Splunk HEC receiver.
 type: object
 properties:
+  ack:
+    $ref: ack
   health_path:
     description: HealthPath for health API, default is '/services/collector/health'
     type: string
@@ -31,4 +34,3 @@ properties:
 allOf:
   - $ref: go.opentelemetry.io/collector/config/confighttp.server_config
   - $ref: github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk.access_token_passthrough_config
-  - $ref: ack

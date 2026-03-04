@@ -3,6 +3,7 @@ $defs:
     type: object
     properties:
       health_status:
+        type: string
         x-customType: github.com/aws/aws-sdk-go-v2/service/servicediscovery/types.health_status_filter
       interval:
         type: string
@@ -18,6 +19,7 @@ $defs:
       timeout:
         type: string
         format: duration
+    additionalProperties: false
   dns_resolver:
     description: DNSResolver defines the configuration for the DNS resolver
     type: object
@@ -32,6 +34,7 @@ $defs:
       timeout:
         type: string
         format: duration
+    additionalProperties: false
   k_8_s_svc_resolver:
     description: K8sSvcResolver defines the configuration for the DNS resolver
     type: object
@@ -48,12 +51,14 @@ $defs:
       timeout:
         type: string
         format: duration
+    additionalProperties: false
   protocol:
     description: Protocol holds the individual protocol-specific settings. Only OTLP is supported at the moment.
     type: object
     properties:
       otlp:
-        $ref: go.opentelemetry.io/collector/exporter/otlpexporter.config
+        x-customType: go.opentelemetry.io/collector/exporter/otlpexporter.config
+    additionalProperties: false
   resolver_settings:
     description: ResolverSettings defines the configurations for the backend resolver
     type: object
@@ -70,6 +75,7 @@ $defs:
       static:
         x-optional: true
         $ref: static_resolver
+    additionalProperties: false
   static_resolver:
     description: StaticResolver defines the configuration for the resolver providing a fixed list of backends
     type: object
@@ -78,6 +84,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
 description: Config defines configuration for the exporter.
 type: object
 properties:
@@ -85,6 +92,8 @@ properties:
     $ref: protocol
   resolver:
     $ref: resolver_settings
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   routing_attributes:
     description: RoutingAttributes creates a composite routing key from the listed attributes. For traces, attributes can come from resource, scope, or span, plus the pseudo attributes "span.kind" and "span.name". For metrics, attributes can come from resource, scope, or datapoint attributes.
     type: array
@@ -98,4 +107,3 @@ properties:
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
 allOf:
   - $ref: go.opentelemetry.io/collector/exporter/exporterhelper.timeout_config
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config

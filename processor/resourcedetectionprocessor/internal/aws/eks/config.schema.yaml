@@ -4,3 +4,4 @@ properties:
     type: string
   resource_attributes:
     $ref: ./internal/metadata.resource_attributes_config
+additionalProperties: false

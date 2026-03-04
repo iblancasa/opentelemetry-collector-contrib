@@ -4,7 +4,10 @@
 package internal
 
 import (
+	"bytes"
 	"go/ast"
+	"go/printer"
+	"go/token"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -83,11 +86,29 @@ func ParseTag(tag *ast.BasicLit) (*TagInfo, bool) {
 	if err != nil {
 		unquoted = strings.Trim(tag.Value, "`")
 	}
-	if unquoted == "" {
+	return parseTagValue(unquoted)
+}
+
+func ExprString(expr ast.Expr, fset *token.FileSet) string {
+	if expr == nil {
+		return ""
+	}
+	var buf bytes.Buffer
+	if err := printer.Fprint(&buf, fset, expr); err == nil {
+		return buf.String()
+	}
+	return ""
+}
+
+func ParseTagString(tag string) (*TagInfo, bool) {
+	return parseTagValue(tag)
+}
+
+func parseTagValue(tag string) (*TagInfo, bool) {
+	if tag == "" {
 		return nil, false
 	}
-
-	structTag := reflect.StructTag(unquoted)
+	structTag := reflect.StructTag(tag)
 	mapstructureTag := structTag.Get("mapstructure")
 	if mapstructureTag == "" {
 		return nil, false

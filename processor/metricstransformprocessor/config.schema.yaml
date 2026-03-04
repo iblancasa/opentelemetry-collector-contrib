@@ -16,7 +16,8 @@ properties:
           $ref: config_action
         aggregation_type:
           description: AggregationType specifies how to aggregate. REQUIRED only if Action is COMBINE.
-          $ref: github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/aggregateutil.aggregation_type
+          type: string
+          x-customType: github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/aggregateutil.aggregation_type
         experimental_match_labels:
           description: MatchLabels specifies the label set against which the metric filter will work. This field is optional.
           type: object
@@ -52,7 +53,8 @@ properties:
                   type: string
               aggregation_type:
                 description: AggregationType specifies how to aggregate.
-                $ref: github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/aggregateutil.aggregation_type
+                type: string
+                x-customType: github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal/aggregateutil.aggregation_type
               experimental_scale:
                 description: Scale is a scalar to multiply the values with.
                 type: number
@@ -86,6 +88,10 @@ properties:
                     value:
                       description: Value specifies the current label value.
                       type: string
+                  additionalProperties: false
+            additionalProperties: false
         submatch_case:
           description: SubmatchCase specifies what case to use for label values created from regexp submatches.
           type: string
+      additionalProperties: false
+additionalProperties: false

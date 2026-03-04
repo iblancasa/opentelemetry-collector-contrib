@@ -1,0 +1,18 @@
+description: Config defines configuration for the Redis storage extension.
+type: object
+properties:
+  db:
+    type: integer
+  endpoint:
+    type: string
+  expiration:
+    type: string
+    format: duration
+  password:
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
+  prefix:
+    type: string
+  tls:
+    $ref: go.opentelemetry.io/collector/config/configtls.client_config
+additionalProperties: false

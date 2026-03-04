@@ -9,10 +9,14 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/iancoleman/strcase"
 	"golang.org/x/tools/go/packages"
+	"gopkg.in/yaml.v3"
 )
 
 type Parser struct {
@@ -22,7 +26,12 @@ type Parser struct {
 	processQueue *list.List
 	pkg          *packages.Package
 	current      *TypeInfo
+	externalPkgs map[string]*packages.Package
+	fset         *token.FileSet
+	issues       []Issue
 }
+
+var ErrNoExportedTypes = errors.New("no exported types found in the package")
 
 type TypeInfo struct {
 	spec      *ast.TypeSpec
@@ -37,11 +46,13 @@ func NewParser(cfg *Config) *Parser {
 		config:       cfg,
 		types:        make(map[string]*TypeInfo),
 		processQueue: list.New(),
+		externalPkgs: make(map[string]*packages.Package),
 	}
 }
 
 func (p *Parser) Parse() (*Schema, error) {
 	set := token.NewFileSet()
+	p.fset = set
 	pkgs, e := packages.Load(&packages.Config{
 		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
 			packages.NeedSyntax | packages.NeedModule,
@@ -69,6 +80,10 @@ func (p *Parser) Parse() (*Schema, error) {
 	}
 
 	return p.schema, nil
+}
+
+func (p *Parser) Issues() []Issue {
+	return p.issues
 }
 
 func (p *Parser) processPackages(set *token.FileSet, pkgs []*packages.Package) {
@@ -124,7 +139,7 @@ func (p *Parser) feedProcessQueue() error {
 		}
 	}
 	if len(p.types) == 0 {
-		return errors.New("no exported types found in the package")
+		return ErrNoExportedTypes
 	}
 	return nil
 }
@@ -150,13 +165,6 @@ func (p *Parser) processTypes() error {
 		}
 		if schemaElement == nil {
 			continue
-		}
-
-		if obj, ok := schemaElement.(*ObjectSchemaElement); ok {
-			isEmpty := len(obj.Properties) == 0 && len(obj.AllOf) == 0
-			if isEmpty {
-				continue // skip struct types with no exported fields
-			}
 		}
 
 		// add parsed type to schema
@@ -187,12 +195,16 @@ func (p *Parser) parseType(typeInfo *TypeInfo) (SchemaElement, error) {
 	// skip non-struct types at the top level
 	switch typeSpec.Type.(type) {
 	case *ast.InterfaceType, *ast.FuncType:
-		// skip these types
-		return nil, nil
+		element := CreateSimpleField(SchemaTypeAny, "")
+		element.CustomElementType = typeInfo.typeName
+		return element, nil
 	}
 	schemaElement, err := p.parseExpr(typeSpec.Type)
 	if err != nil {
 		return nil, err
+	}
+	if schemaElement == nil {
+		return nil, nil
 	}
 	if len(typeInfo.comms) > 0 {
 		if desc, ok := ExtractDescriptionFromComment(typeInfo.comms[0]); ok {
@@ -232,13 +244,29 @@ func (p *Parser) parseStruct(structType *ast.StructType) (SchemaElement, error) 
 		if !ok {
 			continue
 		}
-		if len(field.Names) == 0 || tag.Squash {
+		if tag.Squash {
+			if err := p.addEmbeddedField(field, schemaObject); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		if len(field.Names) == 0 {
+			if tag.Name != "" && tag.Name != "-" {
+				p.addNamedField(tag.Name, field, schemaObject)
+				continue
+			}
 			if err := p.addEmbeddedField(field, schemaObject); err != nil {
 				return nil, err
 			}
 			continue
 		}
 		p.addNamedFields(field, schemaObject)
+	}
+
+	if obj, ok := schemaObject.(*ObjectSchemaElement); ok {
+		if len(obj.AllOf) > 0 {
+			obj.AdditionalProperties = nil
+		}
 	}
 
 	return schemaObject.(SchemaElement), nil
@@ -257,7 +285,9 @@ func (p *Parser) addEmbeddedField(field *ast.Field, schemaObject SchemaObject) e
 			return nil
 		}
 
-		return errors.New("unrecognized embedded field type ")
+		err := errors.New("unrecognized embedded field type")
+		p.recordIssue(field, "(embedded)", err)
+		return err
 	}
 
 	elem, err := p.parseIdent(ident)
@@ -269,6 +299,9 @@ func (p *Parser) addEmbeddedField(field *ast.Field, schemaObject SchemaObject) e
 		case *ObjectSchemaElement:
 			return mergeSchemas(schemaObject, elem)
 		}
+	}
+	if err != nil {
+		p.recordIssue(field, "(embedded)", err)
 	}
 	return err
 }
@@ -291,7 +324,7 @@ func (p *Parser) addNamedFields(field *ast.Field, schemaObject SchemaObject) {
 func (p *Parser) addNamedField(fieldName string, field *ast.Field, schemaObject SchemaObject) {
 	element, err := p.parseExpr(field.Type)
 	if err != nil {
-		fmt.Printf("Error parsing field %s: %v\n", fieldName, err)
+		p.recordIssue(field, fieldName, err)
 		return
 	}
 
@@ -368,6 +401,9 @@ func (p *Parser) parseSelector(selector *ast.SelectorExpr) (SchemaElement, error
 	if path, ok := p.current.imports[pkgName]; ok {
 		_, exists := p.config.Mappings[path]
 		if !exists {
+			if element, ok, err := p.resolveExternalType(path, name); err == nil && ok {
+				return element, nil
+			}
 			// always allow internal packages
 			allowed := strings.HasPrefix(path, ".")
 			// otherwise check allowed refs
@@ -381,7 +417,7 @@ func (p *Parser) parseSelector(selector *ast.SelectorExpr) (SchemaElement, error
 			}
 			fullID := fmt.Sprintf("%s.%s", path, strcase.ToSnake(name))
 			// if allowed - create ref, else create any with custom type
-			if allowed {
+			if allowed && p.canRefPackage(path, name) {
 				element := CreateRefField(fullID, "")
 				return element, nil
 			}
@@ -411,6 +447,117 @@ func (p *Parser) parseSelector(selector *ast.SelectorExpr) (SchemaElement, error
 	}
 
 	return nil, fmt.Errorf("unrecognized type in selector: %s", fullTypeName)
+}
+
+func (p *Parser) canRefPackage(pkgPath, typeName string) bool {
+	if strings.HasPrefix(pkgPath, ".") {
+		dir := filepath.Join(p.config.DirPath, pkgPath)
+		schemaPath, ok := findSchemaFile(dir)
+		if !ok {
+			return false
+		}
+		return schemaHasDef(schemaPath, typeName)
+	}
+	pkg, err := p.loadExternalPackage(pkgPath)
+	if err != nil || pkg == nil || pkg.Module == nil {
+		return false
+	}
+	modPath := pkg.Module.Path
+	modDir := pkg.Module.Dir
+	if !strings.HasPrefix(pkgPath, modPath) {
+		return false
+	}
+	rel := strings.TrimPrefix(pkgPath, modPath)
+	rel = strings.TrimPrefix(rel, "/")
+	dir := filepath.Join(modDir, filepath.FromSlash(rel))
+	schemaPath, ok := findSchemaFile(dir)
+	if !ok {
+		return false
+	}
+	return schemaHasDef(schemaPath, typeName)
+}
+
+func findSchemaFile(dir string) (string, bool) {
+	for _, name := range []string{"config.schema.json", "config.schema.yaml", "config.schema.yml"} {
+		candidate := filepath.Join(dir, name)
+		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
+			return candidate, true
+		}
+	}
+	for _, name := range []string{"config.schema.json", "config.schema.yaml", "config.schema.yml"} {
+		candidate := filepath.Join(dir, "config", name)
+		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
+			return candidate, true
+		}
+	}
+	return "", false
+}
+
+func loadSchemaDoc(path string) (any, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext == ".json" {
+		var v any
+		if err := json.Unmarshal(raw, &v); err != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	var v any
+	if err := yaml.Unmarshal(raw, &v); err != nil {
+		return nil, err
+	}
+	return normalizeYAMLValue(v), nil
+}
+
+func schemaHasDef(schemaPath, typeName string) bool {
+	doc, err := loadSchemaDoc(schemaPath)
+	if err != nil {
+		return false
+	}
+	root, ok := doc.(map[string]any)
+	if !ok {
+		return false
+	}
+	defs, ok := root["$defs"].(map[string]any)
+	if !ok {
+		return false
+	}
+	defName := strcase.ToSnake(typeName)
+	_, ok = defs[defName]
+	return ok
+}
+
+func normalizeYAMLValue(v any) any {
+	switch t := v.(type) {
+	case map[string]any:
+		out := make(map[string]any, len(t))
+		for k, v := range t {
+			out[k] = normalizeYAMLValue(v)
+		}
+		return out
+	case map[any]any:
+		out := make(map[string]any, len(t))
+		for k, v := range t {
+			ks, ok := k.(string)
+			if !ok {
+				continue
+			}
+			out[ks] = normalizeYAMLValue(v)
+		}
+		return out
+	case []any:
+		out := make([]any, len(t))
+		for i, v := range t {
+			out[i] = normalizeYAMLValue(v)
+		}
+		return out
+	default:
+		return v
+	}
 }
 
 func (p *Parser) parseOptional(indexExpr *ast.IndexExpr) (SchemaElement, error) {

@@ -12,6 +12,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
 description: Config defines configuration for receiver_creator.
 type: object
 properties:
@@ -30,3 +31,4 @@ properties:
     items:
       type: string
       x-customType: go.opentelemetry.io/collector/component.ID
+additionalProperties: false

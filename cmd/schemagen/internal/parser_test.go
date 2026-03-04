@@ -93,6 +93,12 @@ func TestComponentParser(t *testing.T) {
 			expectedSchemaFile: "testdata/test11/external_refs_config.schema.yaml",
 			rootType:           "ExternalRefsConfig",
 		},
+		{
+			title:              "Test External Alias Types Parsing",
+			inputFile:          "testdata/test12/ExternalAliasConfig.go",
+			expectedSchemaFile: "testdata/test12/external_alias_config.schema.yaml",
+			rootType:           "ExternalAliasConfig",
+		},
 	}
 
 	for _, tc := range testCases {

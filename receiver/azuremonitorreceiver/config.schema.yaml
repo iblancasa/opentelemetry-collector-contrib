@@ -7,6 +7,7 @@ $defs:
         description: AuthenticatorID specifies the name of the azure extension to authenticate the requests to azure monitor.
         type: string
         x-customType: go.opentelemetry.io/collector/component.ID
+    additionalProperties: false
   dimensions_config:
     type: object
     properties:
@@ -15,6 +16,15 @@ $defs:
         type: boolean
       overrides:
         $ref: nested_list_alias
+    additionalProperties: false
+  nested_list_alias:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: string
 description: Config defines the configuration for the various elements of the receiver agent.
 type: object
 properties:

@@ -6,7 +6,10 @@ properties:
     type: boolean
   const_labels:
     description: ConstLabels are values that are applied for every exported metric.
+    type: object
     x-customType: github.com/prometheus/client_golang/prometheus.labels
+    additionalProperties:
+      type: string
   enable_open_metrics:
     description: EnableOpenMetrics enables the use of the OpenMetrics encoding option for the prometheus exporter.
     type: boolean

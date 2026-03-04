@@ -4,6 +4,7 @@ $defs:
     properties:
       plain:
         $ref: plain_auth
+    additionalProperties: false
   connection_config:
     type: object
     properties:
@@ -27,6 +28,7 @@ $defs:
         $ref: go.opentelemetry.io/collector/config/configtls.client_config
       vhost:
         type: string
+    additionalProperties: false
   plain_auth:
     type: object
     properties:
@@ -34,6 +36,7 @@ $defs:
         type: string
       username:
         type: string
+    additionalProperties: false
   routing_config:
     type: object
     properties:
@@ -41,6 +44,7 @@ $defs:
         type: string
       routing_key:
         type: string
+    additionalProperties: false
 type: object
 properties:
   connection:
@@ -55,3 +59,4 @@ properties:
     $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   routing:
     $ref: routing_config
+additionalProperties: false

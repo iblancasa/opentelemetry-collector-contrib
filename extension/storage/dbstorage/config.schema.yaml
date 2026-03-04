@@ -1,0 +1,8 @@
+description: Config defines configuration for dbstorage extension.
+type: object
+properties:
+  datasource:
+    type: string
+  driver:
+    type: string
+additionalProperties: false

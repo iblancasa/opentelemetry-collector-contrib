@@ -16,12 +16,14 @@ $defs:
       max_open:
         x-pointer: true
         type: integer
+    additionalProperties: false
   query_sample_collection:
     type: object
     properties:
       max_rows_per_query:
         type: integer
         x-customType: int64
+    additionalProperties: false
   top_query_collection:
     type: object
     properties:
@@ -42,8 +44,11 @@ $defs:
       top_n_query:
         type: integer
         x-customType: int64
+    additionalProperties: false
 type: object
 properties:
+  connection_pool:
+    $ref: connection_pool
   databases:
     type: array
     items:
@@ -53,15 +58,18 @@ properties:
     items:
       type: string
   password:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
+  query_sample_collection:
+    $ref: query_sample_collection
+  tls:
+    $ref: go.opentelemetry.io/collector/config/configtls.client_config
+  top_query_collection:
+    $ref: top_query_collection
   username:
     type: string
 allOf:
   - $ref: go.opentelemetry.io/collector/scraper/scraperhelper.controller_config
   - $ref: go.opentelemetry.io/collector/config/confignet.addr_config
-  - $ref: go.opentelemetry.io/collector/config/configtls.client_config
-  - $ref: connection_pool
   - $ref: ./internal/metadata.metrics_builder_config
   - $ref: ./internal/metadata.logs_builder_config
-  - $ref: query_sample_collection
-  - $ref: top_query_collection

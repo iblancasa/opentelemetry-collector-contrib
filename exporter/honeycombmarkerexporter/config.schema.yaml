@@ -17,6 +17,7 @@ $defs:
       url_key:
         description: URLKey is the attribute that will be used as the url. If necessary the value will be converted to a string.
         type: string
+    additionalProperties: false
   rules:
     type: object
     properties:
@@ -25,12 +26,14 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
 description: Config defines configuration for the Honeycomb Marker exporter.
 type: object
 properties:
   api_key:
     description: APIKey is the authentication token associated with the Honeycomb account.
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   api_url:
     description: API URL to use (defaults to https://api.honeycomb.io)
     type: string
@@ -39,9 +42,10 @@ properties:
     type: array
     items:
       $ref: marker
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   sending_queue:
     x-optional: true
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
 allOf:
   - $ref: go.opentelemetry.io/collector/config/confighttp.client_config
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config

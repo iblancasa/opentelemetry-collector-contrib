@@ -1,0 +1,7 @@
+type: object
+properties:
+  protocol:
+    type: string
+  version:
+    type: string
+additionalProperties: false

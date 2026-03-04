@@ -17,6 +17,7 @@ $defs:
       summary:
         description: Summary is the table name for summary metric type. default is `otel_metrics_summary`.
         $ref: ./internal/metrics.metric_type_config
+    additionalProperties: false
   table_engine:
     description: TableEngine defines the ENGINE string value when creating the table.
     type: object
@@ -25,6 +26,7 @@ $defs:
         type: string
       params:
         type: string
+    additionalProperties: false
 description: Config defines configuration for clickhouse exporter.
 type: object
 properties:
@@ -62,7 +64,10 @@ properties:
     $ref: metric_tables_config
   password:
     description: Password is the authentication password.
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   sending_queue:
     x-optional: true
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
@@ -84,4 +89,3 @@ properties:
     type: string
 allOf:
   - $ref: go.opentelemetry.io/collector/exporter/exporterhelper.timeout_config
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config

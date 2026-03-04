@@ -8,52 +8,12 @@ $defs:
         type: boolean
       key:
         description: 'Key is the Datadog API key to associate your Agent''s data with your organization. Create a new API key here: https://app.datadoghq.com/account/settings'
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
       site:
         description: Site is the site of the Datadog intake to send data to. The default value is "datadoghq.com".
         type: string
-  config:
-    description: Config defines configuration for the Datadog exporter.
-    type: object
-    properties:
-      api:
-        description: API defines the Datadog API configuration.
-        $ref: api_config
-      host_metadata:
-        description: HostMetadata defines the host metadata specific configuration
-        $ref: host_metadata_config
-      hostname_detection_timeout:
-        description: HostnameDetectionTimeout defines the timeout for hostname detection. This is necessary for initializing datadog exporter On K8s, it must be set to less than `failureThreshold * periodSeconds` due to initialization blocking health_check liveness probes on startup. If set to zero duration, there will be no timeout applied. Default is 25 seconds.
-        type: string
-        format: duration
-      logs:
-        description: Logs defines the Logs exporter specific configuration
-        $ref: logs_config
-      metrics:
-        description: Metrics defines the Metrics exporter specific configuration
-        $ref: metrics_config
-      only_metadata:
-        description: OnlyMetadata defines whether to only send metadata This is useful for agent-collector setups, so that metadata about a host is sent to the backend even when telemetry data is reported via a different host. This flag is incompatible with disabling host metadata, `use_resource_metadata`, or `host_metadata::hostname_source != first_resource`
-        type: boolean
-      orchestrator_explorer:
-        $ref: orchestrator_explorer_config
-      sending_queue:
-        x-optional: true
-        $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
-      traces:
-        description: Traces defines the Traces exporter specific configuration
-        $ref: traces_exporter_config
-    allOf:
-      - $ref: go.opentelemetry.io/collector/config/confighttp.client_config
-      - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
-      - $ref: tags_config
-  connector_component_config:
-    description: ConnectorComponentConfig defines the configuration for the Datadog connector component
-    type: object
-    properties:
-      traces:
-        description: Traces defines the Traces specific configuration
-        $ref: traces_connector_config
+    additionalProperties: false
   cumulative_monotonic_sum_mode:
     description: CumulativeMonotonicSumMode is the export mode for OTLP Sum metrics.
     type: string
@@ -70,6 +30,7 @@ $defs:
       send_count_sum_metrics:
         description: 'SendCountSum states if the export should send .sum and .count metrics for histograms. The default is false. Deprecated: [v0.75.0] Use `send_aggregation_metrics` (HistogramConfig.SendAggregations) instead.'
         type: boolean
+    additionalProperties: false
   histogram_mode:
     type: string
   host_metadata_config:
@@ -91,6 +52,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   hostname_source:
     description: HostnameSource is the source for the hostname of host metadata.
     type: string
@@ -142,6 +104,7 @@ $defs:
       resource_attributes_as_tags:
         description: ResourceAttributesAsTags, if set to true, will use the exporterhelper feature to transform all resource attributes into metric labels, which are then converted into tags
         type: boolean
+    additionalProperties: false
   orchestrator_explorer_config:
     description: OrchestratorExplorerConfig defines configuration for the Datadog orchestrator explorer.
     type: object
@@ -161,6 +124,7 @@ $defs:
       initial_cumulative_monotonic_value:
         description: InitialCumulativeMonotonicMode defines the behavior of the exporter when receiving the first value of a cumulative monotonic sum.
         $ref: initial_value_mode
+    additionalProperties: false
   summary_config:
     description: SummaryConfig customizes export of OTLP Summaries.
     type: object
@@ -168,6 +132,7 @@ $defs:
       mode:
         description: Mode is the mode for exporting OTLP Summaries. Valid values are 'noquantiles' or 'gauges'. - 'noquantiles' sends no `.quantile` metrics. `.sum` and `.count` metrics will still be sent. - 'gauges' sends `.quantile` metrics as gauges tagged by the quantile. The default is 'gauges'. See https://docs.datadoghq.com/metrics/otlp/?tab=summary#mapping for details and examples.
         $ref: summary_mode
+    additionalProperties: false
   summary_mode:
     description: SummaryMode is the export mode for OTLP Summary metrics.
     type: string
@@ -178,6 +143,7 @@ $defs:
       hostname:
         description: Hostname is the fallback hostname used for payloads without hostname-identifying attributes. This option will NOT change the hostname applied to your metrics, traces and logs if they already have hostname-identifying attributes. If unset, the hostname will be determined automatically. See https://docs.datadoghq.com/opentelemetry/schema_semantics/hostname/?tab=datadogexporter#fallback-hostname-logic for details. Prefer using the `datadog.host.name` resource attribute over using this setting. See https://docs.datadoghq.com/opentelemetry/schema_semantics/hostname/?tab=datadogexporter#general-hostname-semantic-conventions for details.
         type: string
+    additionalProperties: false
   traces_config:
     description: TracesConfig defines the traces exporter specific configuration options
     type: object
@@ -212,27 +178,7 @@ $defs:
         type: object
         additionalProperties:
           type: string
-  traces_connector_config:
-    description: TracesConnectorConfig Traces configuration in DD connector
-    type: object
-    properties:
-      bucket_interval:
-        description: BucketInterval specifies the time interval size of aggregation buckets that aggregate the Datadog trace metrics. It is also the time interval that Datadog trace metrics payloads are flushed to the pipeline. If you are concerned about the metric volume generated by the Datadog connector and the resulting networking egress, try increasing bucket_interval. Default is 10s if unset.
-        type: string
-        format: duration
-      ignore_missing_datadog_fields:
-        description: IgnoreMissingDatadogFields specifies whether we should recompute DD span fields if the corresponding "datadog." namespaced span attributes are missing. If it is false (default), we will use the incoming "datadog." namespaced OTLP span attributes to construct the DD span, and if they are missing, we will recompute them from the other OTLP semantic convention attributes. If it is true, we will only populate a field if its associated "datadog." OTLP span attribute exists, otherwise we will leave it empty.
-        type: boolean
-      resource_attributes_as_container_tags:
-        description: ResourceAttributesAsContainerTags specifies the list of resource attributes to be used as container tags.
-        type: array
-        items:
-          type: string
-      trace_buffer:
-        description: TraceBuffer specifies the number of Datadog Agent TracerPayloads to buffer before dropping. The default value is 1000.
-        type: integer
-    allOf:
-      - $ref: traces_config
+    additionalProperties: false
   traces_exporter_config:
     description: TracesExporterConfig Traces configuration in DD exporter
     type: object
@@ -243,3 +189,38 @@ $defs:
     allOf:
       - $ref: go.opentelemetry.io/collector/config/confignet.tcp_addr_config
       - $ref: traces_config
+description: Config defines configuration for the Datadog exporter.
+type: object
+properties:
+  api:
+    description: API defines the Datadog API configuration.
+    $ref: api_config
+  host_metadata:
+    description: HostMetadata defines the host metadata specific configuration
+    $ref: host_metadata_config
+  hostname_detection_timeout:
+    description: HostnameDetectionTimeout defines the timeout for hostname detection. This is necessary for initializing datadog exporter On K8s, it must be set to less than `failureThreshold * periodSeconds` due to initialization blocking health_check liveness probes on startup. If set to zero duration, there will be no timeout applied. Default is 25 seconds.
+    type: string
+    format: duration
+  logs:
+    description: Logs defines the Logs exporter specific configuration
+    $ref: logs_config
+  metrics:
+    description: Metrics defines the Metrics exporter specific configuration
+    $ref: metrics_config
+  only_metadata:
+    description: OnlyMetadata defines whether to only send metadata This is useful for agent-collector setups, so that metadata about a host is sent to the backend even when telemetry data is reported via a different host. This flag is incompatible with disabling host metadata, `use_resource_metadata`, or `host_metadata::hostname_source != first_resource`
+    type: boolean
+  orchestrator_explorer:
+    $ref: orchestrator_explorer_config
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
+  sending_queue:
+    x-optional: true
+    $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
+  traces:
+    description: Traces defines the Traces exporter specific configuration
+    $ref: traces_exporter_config
+allOf:
+  - $ref: go.opentelemetry.io/collector/config/confighttp.client_config
+  - $ref: tags_config

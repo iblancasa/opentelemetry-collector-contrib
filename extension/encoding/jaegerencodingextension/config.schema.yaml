@@ -1,0 +1,8 @@
+$defs:
+  jaeger_protocol:
+    type: string
+type: object
+properties:
+  protocol:
+    $ref: jaeger_protocol
+additionalProperties: false

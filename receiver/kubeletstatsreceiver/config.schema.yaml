@@ -6,6 +6,7 @@ $defs:
         type: boolean
       pod:
         type: boolean
+    additionalProperties: false
 type: object
 properties:
   collect_all_network_interfaces:
@@ -15,7 +16,8 @@ properties:
     description: ExtraMetadataLabels contains list of extra metadata that should be taken from /pods endpoint and put as extra labels on metrics resource. No additional metadata is fetched by default, so there are no extra calls to /pods endpoint. Supported values include container.id and k8s.volume.type.
     type: array
     items:
-      $ref: ./internal/kubelet.metadata_label
+      type: string
+      x-customType: ./internal/kubelet.metadata_label
   k8s_api_config:
     description: Configuration of the Kubernetes API client.
     x-pointer: true
@@ -24,7 +26,8 @@ properties:
     description: MetricGroupsToCollect provides a list of metrics groups to collect metrics from. "container", "pod", "node" and "volume" are the only valid groups.
     type: array
     items:
-      $ref: ./internal/kubelet.metric_group
+      type: string
+      x-customType: ./internal/kubelet.metric_group
   node:
     description: 'NodeName is the node name to limit the discovery of nodes. For example, node name can be set using the downward API inside the collector pod spec as follows: env: - name: K8S_NODE_NAME valueFrom: fieldRef: fieldPath: spec.nodeName Then set this value to ${env:K8S_NODE_NAME} in the configuration.'
     type: string

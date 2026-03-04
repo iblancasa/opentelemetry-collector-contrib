@@ -1,68 +1,71 @@
-type: object
 $defs:
-  schedule:
-    properties:
-      interval:
-        type: string
-        format: duration
-        x-customType: time.Duration
-      next_run:
-        type: string
-        format: date-time
-        x-customType: time.Time
-      timestamps:
-        items:
-          type: string
-          format: date-time
-          x-customType: time.Time
-        type: array
-    type: object
+    schedule:
+        additionalProperties: false
+        properties:
+            interval:
+                format: duration
+                type: string
+                x-customType: time.Duration
+            next_run:
+                format: date-time
+                type: string
+                x-customType: time.Time
+            timestamps:
+                items:
+                    format: date-time
+                    type: string
+                    x-customType: time.Time
+                type: array
+        type: object
+additionalProperties: false
 properties:
-  durations:
-    additionalProperties:
-      type: string
-      format: duration
-      x-customType: time.Duration
-    type: object
-  optional_schedule:
-    $ref: schedule
-    x-pointer: true
-  probes:
-    items:
-      type: string
-      format: date-time
-      x-customType: time.Time
-      x-pointer: true
-    type: array
-  retry_intervals:
-    items:
-      type: string
-      format: duration
-      x-customType: time.Duration
-    type: array
-  schedule:
-    $ref: 'schedule'
-  start_at:
-    type: string
-    format: date-time
-    x-customType: time.Time
-  timeout:
-    type: string
-    format: duration
-    x-customType: time.Duration
-  window:
-    properties:
-      begin:
-        type: string
-        format: date-time
-        x-customType: time.Time
+    durations:
+        additionalProperties:
+            format: duration
+            type: string
+            x-customType: time.Duration
+        type: object
+    optional_schedule:
+        $ref: schedule
         x-pointer: true
-      end:
-        type: string
+    probes:
+        items:
+            format: date-time
+            type: string
+            x-customType: time.Time
+            x-pointer: true
+        type: array
+    retry_intervals:
+        items:
+            format: duration
+            type: string
+            x-customType: time.Duration
+        type: array
+    schedule:
+        $ref: schedule
+    start_at:
         format: date-time
-        x-customType: time.Time
-      grace:
         type: string
+        x-customType: time.Time
+    timeout:
         format: duration
+        type: string
         x-customType: time.Duration
-    type: object
+    window:
+        additionalProperties: false
+        properties:
+            begin:
+                format: date-time
+                type: string
+                x-customType: time.Time
+                x-pointer: true
+            end:
+                format: date-time
+                type: string
+                x-customType: time.Time
+            grace:
+                format: duration
+                type: string
+                x-customType: time.Duration
+        type: object
+type: object

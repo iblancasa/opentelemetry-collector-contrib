@@ -5,6 +5,7 @@ $defs:
       max_rows_per_query:
         type: integer
         x-customType: uint64
+    additionalProperties: false
   statement_events_config:
     type: object
     properties:
@@ -15,6 +16,7 @@ $defs:
       time_limit:
         type: string
         format: duration
+    additionalProperties: false
   top_query_collection:
     type: object
     properties:
@@ -35,6 +37,7 @@ $defs:
       top_query_count:
         type: integer
         x-customType: uint64
+    additionalProperties: false
 type: object
 properties:
   allow_native_passwords:
@@ -42,7 +45,8 @@ properties:
   database:
     type: string
   password:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   query_sample_collection:
     $ref: query_sample_collection
   statement_events:

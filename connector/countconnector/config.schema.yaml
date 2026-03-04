@@ -6,6 +6,7 @@ $defs:
         x-customType: any
       key:
         type: string
+    additionalProperties: false
   metric_info:
     description: MetricInfo for a data type
     type: object
@@ -20,6 +21,7 @@ $defs:
           type: string
       description:
         type: string
+    additionalProperties: false
 description: Config for the connector
 type: object
 properties:
@@ -47,3 +49,4 @@ properties:
     type: object
     additionalProperties:
       $ref: metric_info
+additionalProperties: false

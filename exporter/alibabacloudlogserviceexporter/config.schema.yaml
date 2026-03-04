@@ -5,7 +5,8 @@ properties:
     type: string
   access_key_secret:
     description: AlibabaCloud access key secret
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   ecs_ram_role:
     description: Set AlibabaCLoud ECS ram role if you are using ACK
     type: string
@@ -21,3 +22,4 @@ properties:
   token_file_path:
     description: Set Token File Path if you are using ACK
     type: string
+additionalProperties: false

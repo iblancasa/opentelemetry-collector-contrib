@@ -4,7 +4,8 @@ properties:
   metrics:
     $ref: ./internal/metadata.metrics_builder_config
   password:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   username:
     type: string
 allOf:

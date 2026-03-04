@@ -44,6 +44,7 @@ properties:
               regex:
                 description: Regex validation
                 type: string
+            additionalProperties: false
       allOf:
         - $ref: go.opentelemetry.io/collector/config/confighttp.client_config
 allOf:

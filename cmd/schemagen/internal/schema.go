@@ -60,7 +60,7 @@ type ObjectSchemaElement struct {
 	SchemaObject         `json:"-" yaml:"-"`
 	FieldSchemaElement   `json:",inline" yaml:",inline"`
 	Properties           map[string]SchemaElement `json:"properties,omitempty" yaml:"properties,omitempty"`
-	AdditionalProperties SchemaElement            `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
+	AdditionalProperties any                      `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
 	AllOf                []SchemaElement          `json:"allOf,omitempty" yaml:"allOf,omitempty"`
 }
 
@@ -80,6 +80,8 @@ func (s *ObjectSchemaElement) AddEmbedded(element SchemaElement) {
 				return
 			}
 		}
+		// Let the embedded schema govern allowed fields.
+		s.AdditionalProperties = nil
 	}
 	s.AllOf = append(s.AllOf, element)
 }
@@ -157,6 +159,7 @@ func CreateObjectField(description string) *ObjectSchemaElement {
 			ElementType: SchemaTypeObject,
 		},
 		Properties: make(map[string]SchemaElement),
+		AdditionalProperties: false,
 	}
 }
 

@@ -1,29 +1,31 @@
-type: object
 $defs:
-  address:
-    properties:
-      hostname:
-        type: string
-      path:
-        type: string
-      port:
-        type: integer
-        x-pointer: true
-    type: object
+    address:
+        additionalProperties: false
+        properties:
+            hostname:
+                type: string
+            path:
+                type: string
+            port:
+                type: integer
+                x-pointer: true
+        type: object
+additionalProperties: false
 properties:
-  address:
-    $ref: 'address'
-    x-pointer: true
-  name:
-    type: string
-    x-pointer: true
-  other_addresses:
-    items:
-      $ref: 'address'
-    type: array
-    x-pointer: true
-  tags:
-    items:
-      type: string
-    type: array
-    x-pointer: true
+    address:
+        $ref: address
+        x-pointer: true
+    name:
+        type: string
+        x-pointer: true
+    other_addresses:
+        items:
+            $ref: address
+        type: array
+        x-pointer: true
+    tags:
+        items:
+            type: string
+        type: array
+        x-pointer: true
+type: object

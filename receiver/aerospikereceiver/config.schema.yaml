@@ -6,7 +6,8 @@ properties:
   endpoint:
     type: string
   password:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   timeout:
     type: string
     format: duration

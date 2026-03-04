@@ -1,0 +1,6 @@
+$defs:
+  config:
+    type: object
+    additionalProperties: false
+  mode:
+    type: string

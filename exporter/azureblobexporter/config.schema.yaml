@@ -6,6 +6,7 @@ $defs:
         type: boolean
       separator:
         type: string
+    additionalProperties: false
   auth_type:
     type: string
   authentication:
@@ -28,6 +29,7 @@ $defs:
       type:
         description: Type is the authentication type. supported values are connection_string, service_principal, system_managed_identity and user_managed_identity
         $ref: auth_type
+    additionalProperties: false
   blob_name_format:
     type: object
     properties:
@@ -58,6 +60,7 @@ $defs:
         type: string
       traces_format:
         type: string
+    additionalProperties: false
   encodings:
     type: object
     properties:
@@ -73,6 +76,7 @@ $defs:
         x-pointer: true
         type: string
         x-customType: go.opentelemetry.io/collector/component.ID
+    additionalProperties: false
   telemetry_config:
     type: object
     properties:
@@ -82,6 +86,7 @@ $defs:
         type: string
       traces:
         type: string
+    additionalProperties: false
 description: Config contains the main configuration options for the azure storage blob exporter
 type: object
 properties:
@@ -102,8 +107,9 @@ properties:
   format:
     description: FormatType is the format of encoded telemetry data. Supported values are json and proto.
     type: string
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   url:
     description: URL is the endpoint to the azure storage account. This is only required until there is an azure auth extension in the future.
     type: string
-allOf:
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
+additionalProperties: false

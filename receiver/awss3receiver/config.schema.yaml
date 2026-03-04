@@ -8,6 +8,7 @@ $defs:
         x-customType: go.opentelemetry.io/collector/component.ID
       suffix:
         type: string
+    additionalProperties: false
   notifications:
     description: Notifications groups optional notification sources.
     type: object
@@ -16,6 +17,7 @@ $defs:
         x-pointer: true
         type: string
         x-customType: go.opentelemetry.io/collector/component.ID
+    additionalProperties: false
   s_3_downloader_config:
     description: S3DownloaderConfig contains aws s3 downloader related config to controls things like bucket, prefix, batching, connections, retries, etc.
     type: object
@@ -40,6 +42,7 @@ $defs:
         type: string
       s3_prefix:
         type: string
+    additionalProperties: false
   sqs_config:
     description: SQSConfig holds SQS queue configuration for receiving object change notifications.
     type: object
@@ -63,6 +66,7 @@ $defs:
         x-pointer: true
         type: integer
         x-customType: int64
+    additionalProperties: false
 description: Config defines the configuration for the file receiver.
 type: object
 properties:
@@ -82,3 +86,4 @@ properties:
     $ref: sqs_config
   starttime:
     type: string
+additionalProperties: false

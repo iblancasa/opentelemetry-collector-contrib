@@ -23,7 +23,8 @@ $defs:
       label_selector:
         type: string
       mode:
-        $ref: github.com/open-telemetry/opentelemetry-collector-contrib/internal/k8sinventory.mode
+        type: string
+        x-customType: github.com/open-telemetry/opentelemetry-collector-contrib/internal/k8sinventory.mode
       name:
         type: string
       namespaces:
@@ -32,6 +33,7 @@ $defs:
           type: string
       resource_version:
         type: string
+    additionalProperties: false
 type: object
 properties:
   error_mode:

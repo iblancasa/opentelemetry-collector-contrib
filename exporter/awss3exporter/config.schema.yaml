@@ -11,6 +11,7 @@ $defs:
       s3_prefix:
         description: S3Prefix indicates the mapping of the key (directory) prefix used for writing into the bucket to a specific resource attribute value.
         type: string
+    additionalProperties: false
   s_3_uploader_config:
     description: S3UploaderConfig contains aws s3 uploader related config to controls things like bucket, prefix, batching, connections, retries, etc.
     type: object
@@ -20,7 +21,8 @@ $defs:
         type: string
       compression:
         description: 'Compression sets the algorithm used to process the payload before uploading to S3. Valid values are: `gzip`, `zstd`, or no value set.'
-        $ref: go.opentelemetry.io/collector/config/configcompression.type
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configcompression.type
       disable_ssl:
         description: DisableSLL forces communication to happen via HTTP instead of HTTPS.
         type: boolean
@@ -68,6 +70,7 @@ $defs:
       unique_key_func_name:
         description: 'UniqueKeyFuncName specifies a function to use for generating a unique string as part of the S3 key. If unspecified, a default function will be used that generates a random string. Valid values are: "uuidv7"'
         type: string
+    additionalProperties: false
 description: Config contains the main configuration options for the s3 exporter
 type: object
 properties:

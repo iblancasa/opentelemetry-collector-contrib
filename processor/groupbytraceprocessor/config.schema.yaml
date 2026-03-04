@@ -17,3 +17,4 @@ properties:
     description: 'WaitDuration tells the processor to wait for the specified duration for the trace to be complete. Default: 1s.'
     type: string
     format: duration
+additionalProperties: false

@@ -12,6 +12,7 @@ $defs:
       topic_from_metadata_key:
         description: TopicFromMetadataKey holds the name of the metadata key to use as the topic name for this signal type. If this is set, it takes precedence over the topic name set in the topic field.
         type: string
+    additionalProperties: false
 description: Config defines configuration for Kafka exporter.
 type: object
 properties:
@@ -46,6 +47,8 @@ properties:
   profiles:
     description: Profiles holds configuration about how profiles should be sent to Kafka.
     $ref: signal_config
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   sending_queue:
     x-optional: true
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
@@ -60,5 +63,4 @@ properties:
     $ref: signal_config
 allOf:
   - $ref: go.opentelemetry.io/collector/exporter/exporterhelper.timeout_config
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   - $ref: github.com/open-telemetry/opentelemetry-collector-contrib/pkg/kafka/configkafka.client_config

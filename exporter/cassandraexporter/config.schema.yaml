@@ -3,14 +3,17 @@ $defs:
     type: object
     properties:
       password:
-        $ref: go.opentelemetry.io/collector/config/configopaque.string
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configopaque.string
       username:
         type: string
+    additionalProperties: false
   compression:
     type: object
     properties:
       algorithm:
         type: string
+    additionalProperties: false
   replication:
     type: object
     properties:
@@ -18,6 +21,7 @@ $defs:
         type: string
       replication_factor:
         type: integer
+    additionalProperties: false
 type: object
 properties:
   auth:
@@ -39,3 +43,4 @@ properties:
     format: duration
   trace_table:
     type: string
+additionalProperties: false

@@ -9,7 +9,10 @@ $defs:
       http:
         x-pointer: true
         $ref: go.opentelemetry.io/collector/config/confighttp.server_config
+    additionalProperties: false
 description: Config defines configuration for skywalking receiver.
 type: object
-allOf:
-  - $ref: protocols
+properties:
+  protocols:
+    $ref: protocols
+additionalProperties: false

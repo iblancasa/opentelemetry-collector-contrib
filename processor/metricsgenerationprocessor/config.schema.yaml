@@ -28,6 +28,7 @@ $defs:
       unit:
         description: Unit for the new metric being generated.
         type: string
+    additionalProperties: false
 description: Config defines the configuration for the processor.
 type: object
 properties:
@@ -36,3 +37,4 @@ properties:
     type: array
     items:
       $ref: rule
+additionalProperties: false

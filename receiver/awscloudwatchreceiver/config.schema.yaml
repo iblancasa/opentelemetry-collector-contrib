@@ -18,6 +18,7 @@ $defs:
         type: string
       streams:
         $ref: stream_config
+    additionalProperties: false
   group_config:
     description: GroupConfig is the configuration for log group collection
     type: object
@@ -29,6 +30,7 @@ $defs:
         type: object
         additionalProperties:
           $ref: stream_config
+    additionalProperties: false
   logs_config:
     description: LogsConfig is the configuration for the logs portion of this receiver
     type: object
@@ -42,6 +44,7 @@ $defs:
         format: duration
       start_from:
         type: string
+    additionalProperties: false
   stream_config:
     description: StreamConfig represents the configuration for the log stream filtering
     type: object
@@ -56,6 +59,7 @@ $defs:
         items:
           x-pointer: true
           type: string
+    additionalProperties: false
 description: Config is the overall config structure for the awscloudwatchreceiver
 type: object
 properties:
@@ -71,3 +75,4 @@ properties:
     x-pointer: true
     type: string
     x-customType: go.opentelemetry.io/collector/component.ID
+additionalProperties: false

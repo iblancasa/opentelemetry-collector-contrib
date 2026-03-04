@@ -5,7 +5,8 @@ properties:
     properties:
       compression:
         description: 'Compression sets the algorithm used to process the payload before uploading to GCS. Valid values are: `gzip`, `zstd`, or no value set.'
-        $ref: go.opentelemetry.io/collector/config/configcompression.type
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configcompression.type
       file_prefix:
         description: 'FilePrefix holds the prefix for the created filename. This prefix is applied after the partition path (if any). Example: file_prefix: "logs" Result: ".../logs_UUID"'
         type: string
@@ -22,6 +23,7 @@ properties:
           prefix:
             description: 'Prefix holds the prefix for the partition path. This prefix is applied before the time-based partition structure. Example: prefix: "archive" Result: "archive/year=2023/..."'
             type: string
+        additionalProperties: false
       project_id:
         description: ProjectID defines the project where the bucket will be created or where it exists. If it is left empty, it will query the metadata endpoint. It requires the collector to be running in a Google Cloud environment.
         type: string
@@ -31,7 +33,9 @@ properties:
       reuse_if_exists:
         description: ReuseIfExists decides if the bucket should be used if it already exists. If it is set to false, an error will be thrown if the bucket already exists. Otherwise, the existent bucket will be used.
         type: boolean
+    additionalProperties: false
   encoding:
     x-pointer: true
     type: string
     x-customType: go.opentelemetry.io/collector/component.ID
+additionalProperties: false

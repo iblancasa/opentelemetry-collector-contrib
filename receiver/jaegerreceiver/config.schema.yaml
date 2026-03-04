@@ -23,6 +23,7 @@ $defs:
       thrift_http:
         x-optional: true
         $ref: go.opentelemetry.io/collector/config/confighttp.server_config
+    additionalProperties: false
   remote_sampling_config:
     description: RemoteSamplingConfig defines config key for remote sampling fetch endpoint
     type: object
@@ -48,11 +49,13 @@ $defs:
         type: integer
       workers:
         type: integer
+    additionalProperties: false
 description: Config defines configuration for Jaeger receiver.
 type: object
 properties:
+  protocols:
+    $ref: protocols
   remote_sampling:
     x-pointer: true
     $ref: remote_sampling_config
-allOf:
-  - $ref: protocols
+additionalProperties: false

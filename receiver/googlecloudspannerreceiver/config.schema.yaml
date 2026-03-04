@@ -8,6 +8,7 @@ $defs:
           type: string
       instance_id:
         type: string
+    additionalProperties: false
   project:
     type: object
     properties:
@@ -19,6 +20,7 @@ $defs:
         type: string
       service_account_key:
         type: string
+    additionalProperties: false
 type: object
 properties:
   backfill_enabled:

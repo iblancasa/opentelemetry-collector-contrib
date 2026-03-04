@@ -12,7 +12,9 @@ properties:
     type: string
   secret_key:
     description: TencentCloud access key secret
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   topic:
     description: LogService's Topic Name
     type: string
+additionalProperties: false

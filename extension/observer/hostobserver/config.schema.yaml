@@ -1,0 +1,8 @@
+description: Config defines configuration for host observer.
+type: object
+properties:
+  refresh_interval:
+    description: RefreshInterval determines how frequency at which the observer needs to poll for collecting information about new processes.
+    type: string
+    format: duration
+additionalProperties: false

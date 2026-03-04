@@ -9,10 +9,13 @@ $defs:
       http:
         x-pointer: true
         $ref: go.opentelemetry.io/collector/config/confighttp.server_config
+    additionalProperties: false
 description: Config defines configuration for the lokireceiver receiver.
 type: object
 properties:
+  protocols:
+    description: Protocols is the configuration for the supported protocols, currently gRPC and HTTP (Proto and JSON).
+    $ref: protocols
   use_incoming_timestamp:
     type: boolean
-allOf:
-  - $ref: protocols
+additionalProperties: false

@@ -1,9 +1,11 @@
-type: object
+additionalProperties: false
 properties:
-  connection:
-    properties:
-      host:
-        type: string
-      port:
-        type: integer
-    type: object
+    connection:
+        additionalProperties: false
+        properties:
+            host:
+                type: string
+            port:
+                type: integer
+        type: object
+type: object

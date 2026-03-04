@@ -18,13 +18,16 @@ $defs:
         type: integer
       payload_compression:
         description: PayloadCompression is applied on the Arrow IPC stream internally and may have different results from using gRPC-level compression.  This is disabled by default, since gRPC-level compression is enabled by default.  This can be set to "zstd" to turn on Arrow-Zstd compression. Note that `Zstd` applies to gRPC, not Arrow compression.
-        $ref: go.opentelemetry.io/collector/config/configcompression.type
+        type: string
+        x-customType: go.opentelemetry.io/collector/config/configcompression.type
       prioritizer:
         description: Prioritizer is a policy name for how load is distributed across streams.
-        $ref: ./internal/arrow.prioritizer_name
+        type: string
+        x-customType: ./internal/arrow.prioritizer_name
       zstd:
         description: Zstd settings apply to OTel-Arrow use of gRPC specifically. Note that when multiple Otel-Arrow exporters are configured their settings will be applied in arbitrary order. Identical Zstd settings are recommended when multiple OTel-Arrow exporters are in use.
         $ref: github.com/open-telemetry/opentelemetry-collector-contrib/internal/otelarrow/compression/zstd.encoder_config
+    additionalProperties: false
 description: Config defines configuration for OTLP exporter.
 type: object
 properties:

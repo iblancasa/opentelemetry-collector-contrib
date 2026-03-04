@@ -1,0 +1,40 @@
+$defs:
+  check_collector_pipeline_config:
+    description: Type aliases to expose internal types publicly
+    $ref: ./internal/http.check_collector_pipeline_config
+  component_health_config:
+    description: Type aliases to expose internal types publicly
+    $ref: ./internal/common.component_health_config
+  config:
+    description: Config has the configuration for the extension enabling the health check extension, used to report the health status of the service.
+    type: object
+    properties:
+      component_health:
+        description: ComponentHealthConfig is v2 config shared between http and grpc services
+        x-pointer: true
+        $ref: ./internal/common.component_health_config
+      grpc:
+        description: GRPCConfig is v2 config for the grpc healthcheck service.
+        x-pointer: true
+        $ref: ./internal/grpc.config
+      http:
+        description: HTTPConfig is v2 config for the http healthcheck service.
+        x-pointer: true
+        $ref: ./internal/http.config
+    allOf:
+      - $ref: ./internal/http.legacy_config
+  grpc_config:
+    description: Type aliases to expose internal types publicly
+    $ref: ./internal/grpc.config
+  http_config:
+    description: Type aliases to expose internal types publicly
+    $ref: ./internal/http.config
+  http_legacy_config:
+    description: Type aliases to expose internal types publicly
+    $ref: ./internal/http.legacy_config
+  path_config:
+    description: Type aliases to expose internal types publicly
+    $ref: ./internal/http.path_config
+  response_body_config:
+    description: Type aliases to expose internal types publicly
+    $ref: ./internal/http.response_body_config

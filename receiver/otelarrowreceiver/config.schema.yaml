@@ -10,6 +10,7 @@ $defs:
         description: WaitingLimitMiB is the limit on the amount of data waiting to be consumed. This is a dimension of memory limiting to ensure waiters are not consuming an unexpectedly large amount of memory in the arrow receiver.
         type: integer
         x-customType: uint64
+    additionalProperties: false
   arrow_config:
     description: ArrowConfig support configuring the Arrow receiver.
     type: object
@@ -29,6 +30,7 @@ $defs:
       zstd:
         description: Zstd settings apply to OTel-Arrow use of gRPC specifically.
         $ref: github.com/open-telemetry/opentelemetry-collector-contrib/internal/otelarrow/compression/zstd.decoder_config
+    additionalProperties: false
   protocols:
     description: Protocols is the configuration for the supported protocols.
     type: object
@@ -37,11 +39,14 @@ $defs:
         $ref: arrow_config
       grpc:
         $ref: go.opentelemetry.io/collector/config/configgrpc.server_config
+    additionalProperties: false
 description: Config defines configuration for OTel Arrow receiver.
 type: object
 properties:
   admission:
     description: Admission is the configuration for controlling amount of request memory entering the receiver.
     $ref: admission_config
-allOf:
-  - $ref: protocols
+  protocols:
+    description: Protocols is the configuration for gRPC and Arrow.
+    $ref: protocols
+additionalProperties: false

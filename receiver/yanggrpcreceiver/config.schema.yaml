@@ -17,6 +17,7 @@ $defs:
         description: RequestsPerSecond is the maximum number of requests per second per client
         type: number
         x-customType: float64
+    additionalProperties: false
   security_config:
     description: SecurityConfig contains security hardening options
     type: object
@@ -36,6 +37,7 @@ $defs:
       rate_limiting:
         description: RateLimiting contains rate limiting configuration
         $ref: rate_limiting_config
+    additionalProperties: false
   yang_config:
     description: YANGConfig contains YANG parser configuration
     type: object
@@ -49,6 +51,7 @@ $defs:
       max_modules:
         description: MaxModules is the maximum number of YANG modules to cache
         type: integer
+    additionalProperties: false
 description: Config defines configuration for yanggrpc receiver.
 type: object
 properties:

@@ -31,12 +31,6 @@ type Config = struct {
 	AllowedRefs   []string
 }
 
-var (
-	configType   = flag.String("c", "Config", "Config type name for component schema generation")
-	outputFolder = flag.String("o", "", "Output schema folder (defaults to input folder)")
-	fileType     = flag.String("t", "yaml", "Output file type (yaml or json)")
-)
-
 func usage() {
 	docs := []string{
 		"Usage: schemagen [options] <path>",
@@ -57,6 +51,9 @@ func usage() {
 
 func ReadConfig() (*Config, error) {
 	flag.Usage = usage
+	configType := flag.String("c", "Config", "Config type name for component schema generation")
+	outputFolder := flag.String("o", "", "Output schema folder (defaults to input folder)")
+	fileType := flag.String("t", "yaml", "Output file type (yaml or json)")
 	flag.Parse()
 
 	inputPath := flag.Arg(0)
@@ -72,10 +69,11 @@ func ReadConfig() (*Config, error) {
 		dirPath       string
 		output        = *outputFolder
 		mode          = Package
-		mappings      Mappings
+		mappings      = DefaultMappings()
 		ctype         string
 		class         string
 		configPackage string
+		configDir     string
 		allowedRefs   = make([]string, 0)
 	)
 
@@ -110,10 +108,11 @@ func ReadConfig() (*Config, error) {
 	}
 
 	if s, ok := ReadSettingsFile(); ok {
-		mappings = s.Mappings
+		mappings = MergeMappings(DefaultMappings(), s.Mappings)
 		comp := class + "/" + ctype
 		if override, found := s.ComponentOverrides[comp]; found {
 			*configType = override.ConfigName
+			configDir = override.ConfigDir
 		}
 		allowedRefs = s.AllowedRefs
 	}
@@ -122,6 +121,21 @@ func ReadConfig() (*Config, error) {
 	if len(configNameParts) == 2 {
 		configPackage = configNameParts[0]
 		*configType = configNameParts[1]
+	}
+
+	if configDir == "" && configPackage != "" {
+		configDir = configPackage
+	}
+	if configDir != "" {
+		baseDir := dirPath
+		if filepath.IsAbs(configDir) {
+			dirPath = configDir
+		} else {
+			dirPath = filepath.Join(baseDir, configDir)
+		}
+		if output == baseDir {
+			output = dirPath
+		}
 	}
 
 	return &Config{

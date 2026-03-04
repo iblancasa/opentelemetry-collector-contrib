@@ -5,7 +5,8 @@ properties:
   database:
     type: string
   password:
-    $ref: go.opentelemetry.io/collector/config/configopaque.string
+    type: string
+    x-customType: go.opentelemetry.io/collector/config/configopaque.string
   role:
     type: string
   schema:

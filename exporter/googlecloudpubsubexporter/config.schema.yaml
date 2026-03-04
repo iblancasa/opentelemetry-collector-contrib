@@ -12,6 +12,7 @@ $defs:
       remove_resource_attribute:
         description: RemoveResourceAttribute indicates if the ordering key should be removed from the resource attributes.
         type: boolean
+    additionalProperties: false
   signal_config:
     description: SignalConfig holds signal-specific configuration for the Kafka exporter.
     type: object
@@ -25,6 +26,7 @@ $defs:
         description: Encoding is a custom encoding for the marshaling the data onto the message
         type: string
         x-customType: go.opentelemetry.io/collector/component.ID
+    additionalProperties: false
   watermark_config:
     description: WatermarkConfig customizes the behavior of the watermark
     type: object
@@ -36,6 +38,7 @@ $defs:
       behavior:
         description: Behavior of the watermark. Currently, only of the message (none, earliest and current, current being the default) will set the timestamp on pubsub based on timestamps of the events inside the message
         type: string
+    additionalProperties: false
 type: object
 properties:
   compression:
@@ -59,6 +62,8 @@ properties:
   project:
     description: Google Cloud Project ID where the Pubsub client will connect to
     type: string
+  retry_on_failure:
+    $ref: go.opentelemetry.io/collector/config/configretry.back_off_config
   sending_queue:
     x-optional: true
     $ref: go.opentelemetry.io/collector/exporter/exporterhelper.queue_batch_config
@@ -76,4 +81,3 @@ properties:
     $ref: watermark_config
 allOf:
   - $ref: go.opentelemetry.io/collector/exporter/exporterhelper.timeout_config
-  - $ref: go.opentelemetry.io/collector/config/configretry.back_off_config

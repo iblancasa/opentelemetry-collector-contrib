@@ -8,6 +8,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   log_field_attribute:
     type: object
     properties:
@@ -15,6 +16,7 @@ $defs:
         type: boolean
       name:
         type: string
+    additionalProperties: false
   log_field_attributes_config:
     type: object
     properties:
@@ -30,6 +32,7 @@ $defs:
       trace_id:
         x-pointer: true
         $ref: log_field_attribute
+    additionalProperties: false
   nesting_processor_config:
     type: object
     properties:
@@ -47,6 +50,7 @@ $defs:
         type: string
       squash_single_values:
         type: boolean
+    additionalProperties: false
 type: object
 properties:
   add_cloud_namespace:
@@ -65,3 +69,4 @@ properties:
     type: boolean
   translate_telegraf_attributes:
     type: boolean
+additionalProperties: false

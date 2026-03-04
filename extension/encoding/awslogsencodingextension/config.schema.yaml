@@ -1,0 +1,11 @@
+type: object
+properties:
+  format:
+    description: 'Format defines the AWS logs format. Current valid values are: - cloudwatch - vpcflow - s3access - waf - cloudtrail - elbaccess - networkfirewall'
+    type: string
+  vpc_flow_log:
+    description: 'Deprecated: use VPCFlowLogConfig instead. It will be removed in v0.138.0'
+    x-customType: ./internal/unmarshaler/vpc-flow-log.config
+  vpcflow:
+    x-customType: ./internal/unmarshaler/vpc-flow-log.config
+additionalProperties: false

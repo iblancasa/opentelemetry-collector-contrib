@@ -24,7 +24,7 @@ func TestReadConfig(t *testing.T) {
 	require.Equal(t, Package, cfg.Mode)
 	require.Equal(t, dir, cfg.DirPath)
 	require.Equal(t, dir, cfg.OutputFolder)
-	require.Empty(t, cfg.ConfigType)
+	require.Equal(t, "Config", cfg.ConfigType)
 }
 
 func TestReadConfig_Errors(t *testing.T) {
@@ -50,7 +50,7 @@ func TestReadConfig_RespectsRootTypeFlag(t *testing.T) {
 	t.Chdir(dir)
 	target := createConfigFile(t, dir, "component.go")
 
-	cfg, err := readConfigForTest(t, "-r", "ExplicitType", target)
+	cfg, err := readConfigForTest(t, "-c", "ExplicitType", target)
 	require.NoError(t, err)
 
 	require.Equal(t, "ExplicitType", cfg.ConfigType)
@@ -210,24 +210,14 @@ func readConfigForTest(t *testing.T, args ...string) (*Config, error) {
 
 	origArgs := os.Args
 	origCommandLine := flag.CommandLine
-	origRootType := configType
-	origOutputFolder := outputFolder
-	origFileType := fileType
 
 	flag.CommandLine = flag.NewFlagSet(origArgs[0], flag.ContinueOnError)
 	flag.CommandLine.SetOutput(io.Discard)
-
-	configType = flag.String("r", "", "Root type name (default is derived from file name)")
-	outputFolder = flag.String("o", "", "Output schema folder")
-	fileType = flag.String("t", "yaml", "Output file type (yaml or json)")
 
 	os.Args = append([]string{origArgs[0]}, args...)
 	t.Cleanup(func() {
 		os.Args = origArgs
 		flag.CommandLine = origCommandLine
-		configType = origRootType
-		outputFolder = origOutputFolder
-		fileType = origFileType
 	})
 
 	return ReadConfig()

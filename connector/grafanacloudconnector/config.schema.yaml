@@ -9,3 +9,4 @@ properties:
   metrics_flush_interval:
     type: string
     format: duration
+additionalProperties: false

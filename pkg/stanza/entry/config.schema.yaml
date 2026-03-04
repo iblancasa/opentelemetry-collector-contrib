@@ -1,4 +1,32 @@
 $defs:
+  attribute_field:
+    description: AttributeField is the path to an entry attribute
+    type: object
+    additionalProperties: false
+  body_field:
+    description: BodyField is a field found on an entry body.
+    type: object
+    additionalProperties: false
+  entry:
+    description: Entry is a flexible representation of log data associated with a timestamp.
+    type: object
+    additionalProperties: false
+  field:
+    description: Field represents a potential field on an entry. It is used to get, set, and delete values at this field. It is deserialized from JSON dot notation.
+    type: object
+    additionalProperties: false
+  nil_field:
+    description: 'NilField is a struct that implements Field, but does nothing for all its operations. It is useful as a default no-op field to avoid nil checks. Deprecated: Originally used for empty Field comparisons, use Field.IsEmpty instead.'
+    type: object
+    additionalProperties: false
+  resource_field:
+    description: ResourceField is the path to an entry resource
+    type: object
+    additionalProperties: false
+  rootable_field:
+    description: RootableField is a Field that may refer directly to "attributes" or "resource"
+    type: object
+    additionalProperties: false
   severity:
     description: Severity indicates the seriousness of a log entry
     type: integer

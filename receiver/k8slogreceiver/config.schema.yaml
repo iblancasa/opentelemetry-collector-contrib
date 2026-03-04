@@ -23,6 +23,7 @@ $defs:
         type: array
         items:
           type: string
+    additionalProperties: false
   field_extract_config:
     description: FieldExtractConfig allows specifying an extraction rule to extract a resource attribute from pod (or namespace) annotations (or labels). This is a copy of the config from the k8sattributes processor.
     type: object
@@ -42,6 +43,7 @@ $defs:
       tag_name:
         description: 'TagName represents the name of the resource attribute that will be added to logs, metrics or spans. When not specified, a default tag name will be used of the format: - k8s.pod.annotations.<annotation key> - k8s.pod.labels.<label key> - k8s.pod.env.<env key> - otel.env.<env key> For example, if tag_name is not specified and the key is git_sha, then the attribute name will be `k8s.pod.annotations.git_sha`. When key_regex is present, tag_name supports back reference to both named capturing and positioned capturing. For example, if your pod spec contains the following labels, app.kubernetes.io/component: mysql app.kubernetes.io/version: 5.7.21 and you''d like to add tags for all labels with prefix app.kubernetes.io/ and also trim the prefix, then you can specify the following extraction rules: extract: labels: - tag_name: $$1 key_regex: kubernetes.io/(.*) this will add the `component` and `version` tags to the spans or metrics.'
         type: string
+    additionalProperties: false
   filter_config:
     description: FilterConfig allows specifying how to filter containers to collect logs from. By default, all containers are collected from.
     type: object
@@ -76,6 +78,7 @@ $defs:
         type: array
         items:
           $ref: value_filter_config
+    additionalProperties: false
   map_filter_config:
     description: MapFilterConfig allows specifying a filter rule to filter containers based on key value pairs, such as pod annotations, labels or environment variables. Only if all the keys match, this rule is considered to match.
     type: object
@@ -89,6 +92,10 @@ $defs:
       value:
         description: Value represents the value to compare against. If Op is "exists" or "not-exists", this field is ignored. If any of the values match, this rule is considered to match.
         type: string
+    additionalProperties: false
+  runtime_api_config:
+    type: object
+    additionalProperties: false
   source_config:
     description: SourceConfig allows specifying how to discover containers to collect logs from.
     type: object
@@ -114,6 +121,7 @@ $defs:
         type: array
         items:
           $ref: runtime_api_config
+    additionalProperties: false
   value_filter_config:
     description: ValueFilterConfig allows specifying a filter rule to filter containers based on string values, such as pod names, namespaces, container names or pod UIDs. If any of the values match, this rule is considered to match.
     type: object
@@ -124,6 +132,7 @@ $defs:
       value:
         description: Value represents the value to compare against.
         type: string
+    additionalProperties: false
 description: Config is the configuration of a k8slog receiver
 type: object
 properties:
@@ -131,3 +140,4 @@ properties:
     $ref: source_config
   extract:
     $ref: extract_config
+additionalProperties: false
