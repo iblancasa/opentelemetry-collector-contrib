@@ -1,3 +1,4 @@
+x-deprecatedType: mongodbatlas
 $defs:
   access_logs_config:
     type: object

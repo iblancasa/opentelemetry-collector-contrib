@@ -1,3 +1,4 @@
+x-deprecatedType: azuremonitor
 $defs:
   auth_config:
     description: AuthConfig defines the auth settings for the azure receiver.

@@ -11,11 +11,12 @@ import (
 )
 
 type Metadata struct {
-	Type   string `mapstructure:"type"`
-	Status struct {
-		Class string `mapstructure:"class"`
-	} `mapstructure:"status"`
-	Parent string `mapstructure:"parent"`
+	Type           string `mapstructure:"type" yaml:"type"`
+	DeprecatedType string `mapstructure:"deprecated_type" yaml:"deprecated_type"`
+	Status         struct {
+		Class string `mapstructure:"class" yaml:"class"`
+	} `mapstructure:"status" yaml:"status"`
+	Parent string `mapstructure:"parent" yaml:"parent"`
 }
 
 func ReadMetadata(dir string) (*Metadata, bool) {

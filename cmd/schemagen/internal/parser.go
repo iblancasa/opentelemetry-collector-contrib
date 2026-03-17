@@ -56,6 +56,9 @@ func (p *Parser) Parse() (*Schema, error) {
 
 	p.pkg = pkgs[0]
 	p.schema = CreateSchema()
+	if p.config.Mode == Component {
+		p.schema.DeprecatedType = p.config.DeprecatedType
+	}
 	p.processPackages(set, pkgs)
 
 	// select types to process

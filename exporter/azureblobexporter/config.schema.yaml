@@ -1,3 +1,4 @@
+x-deprecatedType: azureblob
 $defs:
   append_blob:
     type: object

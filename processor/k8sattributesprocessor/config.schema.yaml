@@ -1,3 +1,4 @@
+x-deprecatedType: k8sattributes
 $defs:
   exclude_config:
     description: ExcludeConfig represent a list of Pods to exclude

@@ -1,3 +1,4 @@
+x-deprecatedType: ciscoos
 $defs:
   device_config:
     description: DeviceConfig represents configuration for a single Cisco device in the devices list.

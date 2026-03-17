@@ -1,3 +1,4 @@
+x-deprecatedType: googlecloudstorage
 type: object
 properties:
   bucket:

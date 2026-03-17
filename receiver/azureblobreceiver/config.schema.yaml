@@ -1,3 +1,4 @@
+x-deprecatedType: azureblob
 $defs:
   auth_type:
     type: string

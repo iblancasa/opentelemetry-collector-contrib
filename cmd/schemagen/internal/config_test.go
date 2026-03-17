@@ -92,10 +92,11 @@ func TestReadConfig_ReadsSettingsFile(t *testing.T) {
 
 func TestReadConfig_MetadataHandling(t *testing.T) {
 	tests := []struct {
-		name          string
-		metadata      string
-		expectedMode  RunMode
-		expectedClass string
+		name                   string
+		metadata               string
+		expectedMode           RunMode
+		expectedClass          string
+		expectedDeprecatedType string
 	}{
 		{
 			name: "with parent field",
@@ -110,11 +111,13 @@ parent: someparent
 		{
 			name: "receiver class",
 			metadata: `type: testreceiver
+deprecated_type: legacyreceiver
 status:
   class: receiver
 `,
-			expectedMode:  Component,
-			expectedClass: "receiver",
+			expectedMode:           Component,
+			expectedClass:          "receiver",
+			expectedDeprecatedType: "legacyreceiver",
 		},
 		{
 			name: "processor class",
@@ -194,6 +197,7 @@ status:
 
 			require.Equal(t, tt.expectedMode, cfg.Mode)
 			require.Equal(t, tt.expectedClass, cfg.Class)
+			require.Equal(t, tt.expectedDeprecatedType, cfg.DeprecatedType)
 		})
 	}
 }

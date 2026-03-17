@@ -91,6 +91,7 @@ func (d DefsSchemaElement) AddDef(name string, property SchemaElement) {
 }
 
 type Schema struct {
+	DeprecatedType      string            `json:"x-deprecatedType,omitempty" yaml:"x-deprecatedType,omitempty"`
 	Defs                DefsSchemaElement `json:"$defs,omitempty" yaml:"$defs,omitempty"`
 	ObjectSchemaElement `json:",inline" yaml:",inline"`
 }

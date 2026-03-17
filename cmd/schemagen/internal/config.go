@@ -20,15 +20,16 @@ const (
 )
 
 type Config = struct {
-	Mode          RunMode
-	DirPath       string
-	OutputFolder  string
-	ConfigPackage string
-	ConfigType    string
-	FileType      string
-	Class         string
-	Mappings      Mappings
-	AllowedRefs   []string
+	Mode           RunMode
+	DirPath        string
+	OutputFolder   string
+	ConfigPackage  string
+	ConfigType     string
+	DeprecatedType string
+	FileType       string
+	Class          string
+	Mappings       Mappings
+	AllowedRefs    []string
 }
 
 var (
@@ -69,14 +70,15 @@ func ReadConfig() (*Config, error) {
 	}
 
 	var (
-		dirPath       string
-		output        = *outputFolder
-		mode          = Package
-		mappings      Mappings
-		ctype         string
-		class         string
-		configPackage string
-		allowedRefs   = make([]string, 0)
+		dirPath        string
+		output         = *outputFolder
+		mode           = Package
+		mappings       Mappings
+		ctype          string
+		deprecatedType string
+		class          string
+		configPackage  string
+		allowedRefs    = make([]string, 0)
 	)
 
 	switch {
@@ -95,6 +97,7 @@ func ReadConfig() (*Config, error) {
 	}
 
 	if md, ok := ReadMetadata(dirPath); ok {
+		deprecatedType = md.DeprecatedType
 		if md.Parent != "" {
 			mode = Component
 		} else {
@@ -125,14 +128,15 @@ func ReadConfig() (*Config, error) {
 	}
 
 	return &Config{
-		DirPath:       dirPath,
-		OutputFolder:  output,
-		ConfigPackage: configPackage,
-		ConfigType:    *configType,
-		FileType:      *fileType,
-		Mode:          mode,
-		Mappings:      mappings,
-		Class:         class,
-		AllowedRefs:   allowedRefs,
+		DirPath:        dirPath,
+		OutputFolder:   output,
+		ConfigPackage:  configPackage,
+		ConfigType:     *configType,
+		DeprecatedType: deprecatedType,
+		FileType:       *fileType,
+		Mode:           mode,
+		Mappings:       mappings,
+		Class:          class,
+		AllowedRefs:    allowedRefs,
 	}, nil
 }

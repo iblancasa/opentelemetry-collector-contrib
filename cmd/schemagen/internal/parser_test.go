@@ -155,6 +155,52 @@ func TestPackageParser(t *testing.T) {
 	require.YAMLEq(t, expectedSchema, givenYaml)
 }
 
+func TestComponentParserIncludesDeprecatedType(t *testing.T) {
+	dir := t.TempDir()
+
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module example.com/testcomponent\n\ngo 1.24\n"), 0o600))
+
+	configSource := `package test
+
+type Config struct {
+	Endpoint string ` + "`mapstructure:\"endpoint\"`" + `
+}
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "config.go"), []byte(configSource), 0o600))
+
+	metadata := `type: renamed_receiver
+deprecated_type: legacyreceiver
+status:
+  class: receiver
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "metadata.yaml"), []byte(metadata), 0o600))
+
+	cfg := &Config{
+		Mode:           Component,
+		DirPath:        dir,
+		ConfigType:     "Config",
+		DeprecatedType: "legacyreceiver",
+	}
+
+	parser := NewParser(cfg)
+
+	schema, err := parser.Parse()
+	require.NoError(t, err)
+
+	rawYAML, err := schema.ToYAML()
+	require.NoError(t, err)
+
+	expected := `
+x-deprecatedType: legacyreceiver
+type: object
+properties:
+  endpoint:
+    type: string
+`
+
+	require.YAMLEq(t, expected, string(rawYAML))
+}
+
 func testMappings() Mappings {
 	return Mappings{
 		"time": PackagesMapping{

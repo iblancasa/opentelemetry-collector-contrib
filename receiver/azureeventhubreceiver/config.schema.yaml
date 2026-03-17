@@ -1,3 +1,4 @@
+x-deprecatedType: azureeventhub
 $defs:
   event_hub_config:
     description: EventHubConfig defines the configuration for an Azure Event Hub when using authentication.

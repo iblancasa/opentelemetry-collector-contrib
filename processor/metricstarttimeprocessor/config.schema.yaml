@@ -1,3 +1,4 @@
+x-deprecatedType: metricstarttime
 description: Config holds configuration of the metric start time processor.
 type: object
 properties:

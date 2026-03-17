@@ -1,3 +1,4 @@
+x-deprecatedType: prometheusremotewrite
 description: Config holds common fields and embedded protocol-specific configurations
 type: object
 allOf:

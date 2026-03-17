@@ -110,6 +110,9 @@ componentOverrides:
   primitive properties that retain the original Go type under `x-customType`.
 - Optional wrapper types (e.g. `Optional[FooConfig]`) set the `x-optional`
   marker so downstream tooling can highlight nullable fields.
+- Component schemas include `x-deprecatedType` when `metadata.yaml` declares a
+  `deprecated_type`, so downstream validators can keep accepting the legacy
+  component alias during renames.
 
 You can see end-to-end examples in `cmd/schemagen/internal/testdata`, e.g.
 `SimpleConfig.go` → `simple_config.schema.json` or the more involved

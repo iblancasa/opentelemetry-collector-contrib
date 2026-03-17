@@ -1,3 +1,4 @@
+x-deprecatedType: macosunifiedlogging
 description: Config defines configuration for the macOS unified logging receiver Separated into a common file that isn't platform specific so that factory_others.go can reference it
 type: object
 properties:

@@ -1,3 +1,4 @@
+x-deprecatedType: yanggrpc
 $defs:
   rate_limiting_config:
     description: RateLimitingConfig contains rate limiting configuration
