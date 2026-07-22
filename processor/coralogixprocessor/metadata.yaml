@@ -7,6 +7,7 @@ tests:
   config:
     transactions:
       enabled: true
+      max_regular_traces: 0
     critical_path:
       enabled: true
 

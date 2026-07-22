@@ -17,16 +17,25 @@ type TraceTreeNode struct {
 }
 
 type TraceTree struct {
-	Roots []*TraceTreeNode
-	Nodes map[pcommon.SpanID]*TraceTreeNode
+	Roots            []*TraceTreeNode
+	Nodes            map[pcommon.SpanID]*TraceTreeNode
+	MissingParentIDs map[pcommon.SpanID]struct{}
+	DuplicateSpanIDs map[pcommon.SpanID]struct{}
 }
 
 func BuildTraceTree(spans []ptrace.Span) TraceTree {
 	tree := TraceTree{
-		Nodes: make(map[pcommon.SpanID]*TraceTreeNode, len(spans)),
+		Nodes:            make(map[pcommon.SpanID]*TraceTreeNode, len(spans)),
+		MissingParentIDs: make(map[pcommon.SpanID]struct{}),
+		DuplicateSpanIDs: make(map[pcommon.SpanID]struct{}),
 	}
 	for _, span := range spans {
-		tree.Nodes[span.SpanID()] = &TraceTreeNode{
+		spanID := span.SpanID()
+		if _, exists := tree.Nodes[spanID]; exists {
+			tree.DuplicateSpanIDs[spanID] = struct{}{}
+			continue
+		}
+		tree.Nodes[spanID] = &TraceTreeNode{
 			Span:    span,
 			StartNS: int64(span.StartTimestamp()),
 			EndNS:   int64(span.EndTimestamp()),
@@ -36,7 +45,12 @@ func BuildTraceTree(spans []ptrace.Span) TraceTree {
 	for _, node := range tree.Nodes {
 		parentID := node.Span.ParentSpanID()
 		parent, ok := tree.Nodes[parentID]
-		if parentID.IsEmpty() || !ok {
+		if parentID.IsEmpty() {
+			tree.Roots = append(tree.Roots, node)
+			continue
+		}
+		if !ok {
+			tree.MissingParentIDs[parentID] = struct{}{}
 			tree.Roots = append(tree.Roots, node)
 			continue
 		}

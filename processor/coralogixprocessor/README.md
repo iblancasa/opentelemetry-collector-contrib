@@ -19,6 +19,9 @@ The Coralogix processor adds attributes to spans that enable features in Coralog
 
 - `transactions`:
   - `enabled` (`false` by default): enables the transactions feature from the Coralogix processor (more information below).
+  - `max_nodes` (`256` by default): New Relic go-agent-style per-trace node limit. Keep at most this many spans in each completed trace, preferring longer durations, always retaining the transaction root. Dropped middle parents are reparented to the nearest kept ancestor. `0` disables node trimming.
+  - `max_regular_traces` (`1` by default): New Relic go-agent-style harvest limit **per partition**. Across completed traces in a harvest window, each partition keeps only its slowest regular transaction traces for export as full annotated waterfalls. A partition is `(root service.name, cgx.transaction / root span name, sorted set of service.names in the kept trace)`. So `api→worker` does not compete with `api→db`, and different transaction names on the same service do not compete either. `0` disables harvest sampling and forwards every completed trace after node trim.
+  - `harvest_period` (`60s` by default): harvest window used when `max_regular_traces > 0`.
 - `critical_path`:
   - `enabled` (`false` by default): enables critical path calculation for complete traces (more information below).
 
@@ -38,6 +41,11 @@ The processor automatically identifies the transaction root span within each tra
 2. **Transaction attributes**: All spans in the transaction trace receive the following attributes:
     - `cgx.transaction`: Set to the name of the transaction root span
     - `cgx.transaction.root`: Set to `true` for the root span only
+    - `cgx.transaction.self_time_ns`: Exclusive wall-clock time in nanoseconds (parent duration minus the union of direct-child intervals clamped to the parent). Computed on the **full** tree before node trimming. Omitted for partial traces (duplicate span IDs, or empty-parent roots alongside unresolved parents).
+3. **Node trim** (optional): when `max_nodes > 0`, the outgoing span set is trimmed to the slowest nodes (always keeping the root), mirroring go-agent `maxTxnTraceNodes`.
+4. **Harvest sampling** (optional): when `max_regular_traces > 0`, completed traces compete in a harvest heap by root duration **within each partition** `(root service.name, transaction name, peer service set)`; only the winners are forwarded each `harvest_period`. This mirrors go-agent `maxRegularTraces`, adapted for multi-service Collector pipelines so dissimilar traces (different services, routes, or call-graph shapes) do not crowd each other out.
+
+Self-time uses interval-union exclusive time (not New Relic's async bounding-box model). The harvest/node heaps mirror go-agent trace sampling behavior for waterfall detail only.
 
 #### Configuration
 
@@ -52,12 +60,25 @@ config:
     coralogix:
       transactions:
         enabled: true
+        max_nodes: 256
+        max_regular_traces: 1
+        harvest_period: 60s
   service:
     pipelines:
       traces:
         processors: 
           - groupbytrace
           - coralogix
+```
+
+To keep previous "forward every completed trace" behavior while still trimming nodes:
+
+```yaml
+coralogix:
+  transactions:
+    enabled: true
+    max_nodes: 256
+    max_regular_traces: 0
 ```
 
 ### Critical path

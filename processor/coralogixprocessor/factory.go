@@ -24,7 +24,10 @@ func NewFactory() processor.Factory {
 func createDefaultConfig() component.Config {
 	return &Config{
 		TransactionsConfig: TransactionsConfig{
-			Enabled: false,
+			Enabled:          false,
+			MaxNodes:         defaultMaxTxnTraceNodes,
+			MaxRegularTraces: defaultMaxRegularTraces,
+			HarvestPeriod:    defaultHarvestPeriod,
 		},
 		CriticalPathConfig: CriticalPathConfig{
 			Enabled: false,

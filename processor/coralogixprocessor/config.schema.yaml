@@ -11,7 +11,20 @@ $defs:
     properties:
       enabled:
         type: boolean
+      max_nodes:
+        description: Keep at most this many spans per completed trace (longest durations; always keep root). 0 disables trimming. Default 256.
+        type: integer
+      max_regular_traces:
+        description: Keep only the slowest completed traces per harvest window for each service.name. Different services do not compete. 0 disables harvest sampling. Default 1.
+        type: integer
+      harvest_period:
+        description: Harvest window when max_regular_traces > 0. Default 60s.
+        type: string
+        format: duration
+description: Config defines the configuration options for coralogixprocessor.
 type: object
-allOf:
-  - $ref: transactions_config
-  - $ref: critical_path_config
+properties:
+  transactions:
+    $ref: transactions_config
+  critical_path:
+    $ref: critical_path_config

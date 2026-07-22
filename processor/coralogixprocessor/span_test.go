@@ -20,6 +20,9 @@ func TestCreateDefaultConfig(t *testing.T) {
 	cfg := createDefaultConfig().(*Config)
 
 	assert.False(t, cfg.TransactionsConfig.Enabled)
+	assert.Equal(t, defaultMaxTxnTraceNodes, cfg.TransactionsConfig.MaxNodes)
+	assert.Equal(t, defaultMaxRegularTraces, cfg.TransactionsConfig.MaxRegularTraces)
+	assert.Equal(t, defaultHarvestPeriod, cfg.TransactionsConfig.HarvestPeriod)
 	assert.False(t, cfg.CriticalPathConfig.Enabled)
 }
 

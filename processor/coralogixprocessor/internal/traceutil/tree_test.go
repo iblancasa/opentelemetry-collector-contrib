@@ -42,6 +42,17 @@ func TestBuildTraceTreeTreatsMissingParentAsRoot(t *testing.T) {
 	assert.Equal(t, orphan.SpanID(), tree.Roots[0].Span.SpanID())
 	assert.Nil(t, tree.Roots[0].Parent)
 	assert.Empty(t, tree.Roots[0].Children)
+	require.Len(t, tree.MissingParentIDs, 1)
+}
+
+func TestBuildTraceTreeTracksDuplicateSpanIDs(t *testing.T) {
+	first := newTraceTreeSpan(1, 0, 100, 0)
+	dup := newTraceTreeSpan(1, 10, 50, 0)
+
+	tree := BuildTraceTree([]ptrace.Span{first, dup})
+
+	require.Len(t, tree.Nodes, 1)
+	require.Len(t, tree.DuplicateSpanIDs, 1)
 }
 
 func newTraceTreeSpan(spanID byte, startNS, endNS int64, parentSpanID byte) ptrace.Span {
